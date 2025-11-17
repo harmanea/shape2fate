@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from parameters import AcquisitionParameters
-from sim import diffraction_limit
+from .parameters import AcquisitionParameters
+from .sim import diffraction_limit
 
 
 class OTF(ABC):
