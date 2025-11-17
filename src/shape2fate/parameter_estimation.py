@@ -4,10 +4,10 @@ import numpy as np
 from numpy.fft import fft2, ifft2
 from scipy import optimize
 
-from parameters import ReconstructionParameters, AcquisitionParameters
-from sim import component_separation_matrix, diffraction_limit
-from otf import OTF
-from reconstruction import component_padding_matrices, fourier_shift_matrix
+from .parameters import ReconstructionParameters, AcquisitionParameters
+from .sim import component_separation_matrix, diffraction_limit
+from .otf import OTF
+from .reconstruction import component_padding_matrices, fourier_shift_matrix
 
 
 _XX = np.linspace(0, 2 * np.pi, 6, False)
