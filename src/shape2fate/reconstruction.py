@@ -3,9 +3,9 @@ import torch
 
 from typing import Union
 
-from otf import OTF
-from parameters import AcquisitionParameters, ReconstructionParameters
-from sim import diffraction_limit, component_separation_matrix
+from .otf import OTF
+from .parameters import AcquisitionParameters, ReconstructionParameters
+from .sim import diffraction_limit, component_separation_matrix
 
 
 def reconstruction_preprocess(images: np.ndarray, rp: ReconstructionParameters) -> np.ndarray:
