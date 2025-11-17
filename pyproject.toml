@@ -21,6 +21,12 @@ dependencies = [
     "pandas==2.2.1",
     "ortools==9.9.3963",
     "tqdm==4.65.0",
-    "torch==1.13.1",
-    "torchvision==0.14.1"
+
+    # Original versions (not compatible with Python 3.12):
+    # "torch==1.13.1",
+    # "torchvision==0.14.1",
+
+    # Newer versions for Colab:
+    "torch>=2.2",
+    "torchvision>=0.17"
 ]
