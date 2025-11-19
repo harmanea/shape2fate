@@ -9,8 +9,11 @@ from .parameters import AcquisitionParameters, ReconstructionParameters
 
 
 class SyntheticDataset(IterableDataset):
-    def __init__(self):
+    def __init__(self, contrast_fg_range: tuple[float,float] = (0.0, 1.0), contrast_bg_range: tuple[float,float] = (0.0, 1.0)):
         self.patch_size = 128
+        
+        self.contrast_fg_range = contrast_fg_range
+        self.contrast_bg_range = contrast_bg_range        
 
         self.frequency = 0.17
         self.amplitude = 1.0
@@ -38,9 +41,10 @@ class SyntheticDataset(IterableDataset):
                                                       self.patch_size)
                                  for i in range(9)])
 
-        contrast = np.random.random_sample(2)
-        foreground = 250 + contrast[0] * 500
-        background = 50 + contrast[1] * 50
+        fg_c = np.random.uniform(*self.contrast_fg_range)
+        bg_c = np.random.uniform(*self.contrast_bg_range)
+        foreground = 250 + fg_c * 500
+        background = 50 + bg_c * 50
 
         high_res_image = (image * foreground + background) * self.perlin()
 
@@ -58,8 +62,13 @@ class SyntheticDataset(IterableDataset):
 
 
 class SyntheticCCPDataset(SyntheticDataset):
-    def __init__(self):
-        super().__init__()
+    def __init__(self,min_n: int = 5, max_n: int = 15, radius: float = 2.5,
+        contrast_fg_range: tuple[float,float] = (0.0, 1.0),
+        contrast_bg_range: tuple[float,float] = (0.0, 1.0)):
+        super().__init__(
+            contrast_fg_range=contrast_fg_range,
+            contrast_bg_range=contrast_bg_range
+        )
 
         self.patch_size = 128
 
@@ -68,7 +77,10 @@ class SyntheticCCPDataset(SyntheticDataset):
         self.yy = yy.flatten()
         self.xx = xx.flatten()
 
-        self.min_n, self.max_n = 5, 15
+        if not (0 <= min_n < max_n <= 49):
+            raise ValueError("Require 0 ? min_n < max_n ? 49")
+        self.min_n, self.max_n = min_n, max_n
+            
         self.max_offset = 8
         assert self.max_offset < 16
 
@@ -77,7 +89,7 @@ class SyntheticCCPDataset(SyntheticDataset):
         self.beta_b = 1
 
         # CCP shape params
-        self.radius = 2.5
+        self.radius = radius
         self.thickness = 1.0
 
         # Patch positions
