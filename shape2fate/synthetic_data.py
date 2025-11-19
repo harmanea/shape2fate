@@ -18,7 +18,7 @@ class SyntheticDataset(IterableDataset):
         self.frequency = 0.17
         self.amplitude = 1.0
 
-        self.ap = AcquisitionParameters(image_size=self.patch_size, na=1.49, pixel_size=0.07, wavelength=512)
+        self.ap = AcquisitionParameters(image_size=self.patch_size // 2, na=1.49, pixel_size=0.07, wavelength=512)
         self.rp = ReconstructionParameters(wiener_parameter=0.1)
 
         self.otf = ModelOTF(self.ap)
