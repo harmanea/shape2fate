@@ -58,7 +58,7 @@ class SyntheticDataset(IterableDataset):
         noisy_amplitudes = np.random.normal(self.amplitude, 0.1, 3)
 
         reconstruction = cpu_reconstruct(low_res_images, self.otf, noisy_shifts, noisy_phase_offsets, noisy_amplitudes, self.ap, self.rp)
-        return (reconstruction - np.mean(reconstruction)) / np.std(reconstruction)
+        return (reconstruction - np.mean(reconstruction)) / np.std(reconstruction), illumination, low_res_images 
 
 
 class SyntheticCCPDataset(SyntheticDataset):
@@ -119,7 +119,7 @@ class SyntheticCCPDataset(SyntheticDataset):
         y = np.minimum(np.sum(distances, -1), 1)
 
         # Generate simulated SIM image
-        x = super()._simulate_sim(full_image)
+        x,_,_ = super()._simulate_sim(full_image)
 
         return x, y
 
@@ -159,7 +159,7 @@ class SyntheticAdipocytesCCPDataset(SyntheticCCPDataset):
         y = np.minimum(np.sum(distances, -1), 1)
 
         # Generate simulated SIM image
-        x = super()._simulate_sim(full_images.transpose((2, 0, 1)))
+        x,_,_ = super()._simulate_sim(full_images.transpose((2, 0, 1)))
 
         return x, y
 
@@ -291,7 +291,7 @@ class SyntheticExocytosisDataset(SyntheticDataset):
         else:
             y1 = np.zeros((self.patch_size, self.patch_size))
 
-        x = self._simulate_sim(images)
+        x,_,_ = self._simulate_sim(images)
         y = np.stack([y0, y1])
 
         return x, y
