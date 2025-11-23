@@ -68,16 +68,13 @@ if __name__ == "__main__":
     model = s2f.models.UNet(depth=3, start_filters=16, up_mode="nearest")
     print("DONE")
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
     checkpoint_path = os.path.join(DATA_DIR, "ccp-detector-sandy-wildflower-269.pt")
     print(f"Loading model weights from: {checkpoint_path} ... ", end="", flush=True)
-    checkpoint = torch.load(checkpoint_path)
+    checkpoint = torch.load(checkpoint_path, map_location=device)
     model.load_state_dict(checkpoint)
-    model.eval()
-    print("DONE")
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Moving model to device: {device} ... ", end="", flush=True)
-    model.to(device)
     print("DONE")
 
     print("Running CCP detection on test data ... ", end="", flush=True)

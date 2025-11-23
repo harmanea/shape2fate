@@ -28,7 +28,7 @@ To include optional I/O dependencies for reading various microscopy image format
 pip install .[io]
 ```
 
-This is required to run the example and benchmarking scripts.
+**NOTE:** Optional dependencies are required to run the example and benchmarking scripts.
 
 ### 4. Run a quick test
 

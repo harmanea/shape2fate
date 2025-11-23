@@ -29,3 +29,6 @@ io = [
     "nd2==0.9.0",
     "czifile==2019.7.2",
 ]
+
+[tool.setuptools]
+packages = ["shape2fate"]
