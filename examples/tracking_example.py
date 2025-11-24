@@ -3,6 +3,7 @@ import sys
 import ssl
 import zipfile
 from urllib.request import Request, urlopen
+from dataclasses import asdict
 
 import torch
 import numpy as np
@@ -39,7 +40,7 @@ def download_file(url, dest_path, context=None):
 
 
 if __name__ == "__main__":
-    print("\nRunning shape2fate example script ...\n")
+    print("\nRunning shape2fate tracking example script ...\n")
 
     os.makedirs(DATA_DIR, exist_ok=True)
     print(f"Data directory: {os.path.abspath(DATA_DIR)}")
@@ -94,6 +95,9 @@ if __name__ == "__main__":
         maximum_skipped_frames=1,
         minimum_length=6
     )
+    print(f"\nLinking parameters:")
+    for key, value in asdict(lp).items():
+        print(f"   {key}={value:.1f}")
 
     def distance_function(a: pd.DataFrame, b: pd.DataFrame) -> np.ndarray:
         a_xy = np.array(a[["x", "y"]])

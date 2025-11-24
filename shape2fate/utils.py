@@ -65,3 +65,14 @@ def open_image_file(name: str) -> np.ndarray:
             return _open_nd2_file(name)
         case _:
             raise ValueError(f'"{ext}" is an unrecognized file extension')
+
+
+def save_tiff_file(images: np.ndarray, name: str):
+    Image = _require_import("PIL.Image", "Pillow (PIL)")
+
+    if images.ndim == 2:
+        Image.fromarray(images).save(name, format="TIFF")
+
+    else:
+        pil_images = [Image.fromarray(img) for img in images]
+        pil_images[0].save(name, format="TIFF", save_all=True, append_images=pil_images[1:])

@@ -36,7 +36,22 @@ pip install .[io]
 python -c "import shape2fate; print(shape2fate.__version__)"
 ```
 
-### 5. (Optional) Reproduce the tracking results from the paper
+### 5. (Optional) Run a SIM reconstruction example
+
+```bash
+python examples/reconstruction_example.py
+```
+
+This should
+
+* download an example **raw TIRF-SIM endocytosis dataset**,
+* estimate the SIM illumination parameters (frequency, angle, phase, amplitude),
+* run the full SIM reconstruction pipeline (CPU or GPU, depending on availability), and
+* save the outputs into `./data`:
+
+  * `reconstruction.tiff` – the reconstructed TIRF-SIM time series
+
+### 6. (Optional) Reproduce the tracking results from the paper
 
 ```bash
 python examples/tracking_example.py
