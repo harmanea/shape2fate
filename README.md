@@ -155,7 +155,8 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
 - `pyproject.toml` — package metadata and dependencies.
 
 ## Datasets
-Curated training, validation, and demo datasets are now publicly available on Zenodo:
+Curated training, validation, and demo datasets are now publicly available on <a href="https://tinyurl.com/shape2fate">Zenodo</a>:
+
 <a href="https://tinyurl.com/shape2fate"><img src="https://img.shields.io/badge/Dataset-Zenodo-1682d4?style=plastic&logo=zenodo&logoColor=white"/></a>
 
 ## How to cite
