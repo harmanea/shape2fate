@@ -64,6 +64,13 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
 
 ### Install locally
 
+0. Requirements
+
+Before installing shape2fate, make sure you have:
+ * Python 3.9–3.12
+ * Git installed on your system
+ * (Optional) A CUDA-capable GPU for GPU acceleration
+
 1. Clone the repository
 
    ```bash
@@ -97,6 +104,8 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
    ```bash
    python -c "import shape2fate; print(shape2fate.__version__)"
    ```
+
+   **NOTE:** If the installation was successful, this command will print a version number such as: `0.1.0`
 
 5. (Optional) Run a SIM reconstruction example
 
