@@ -74,7 +74,7 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
 2. (Optional) Create and activate a virtual environment
 
    ```bash
-   python3 -m venv .venv
+   python -m venv .venv
    source .venv/bin/activate   # On Windows: .venv\Scripts\activate
    ```
 
