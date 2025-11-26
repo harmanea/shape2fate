@@ -40,7 +40,7 @@
 ### Abstract
 Plasma membrane homeostasis depends on balanced exocytosis and endocytosis, yet their spatiotemporal coordination has been difficult to resolve. We present Shape2Fate, a fully automated, shape-aware deep-learning pipeline that resolves individual exocytic and endocytic carriers in live-cell TIRF-SIM movies. Unlike conventional intensity-based approaches, Shape2Fate exploits morphology: it detects trafficking carriers, tracks them across lifetime shape changes, and classifies cargo-delivery outcomes from their shape evolution. Trained entirely on realistic synthetic data, Shape2Fate reconstructs complete trajectories in crowded scenes and matches expert-level tracking accuracy on experimental data. Using Shape2Fate, we uncover distinct coupling architectures across local and global scales and in spatial and temporal hierarchies: exocytic fusion can initiate clathrin‑coated pits (CCPs), whereas in other contexts exocytic carriers target pre‑existing CPP hotspots for immediate cargo capture. As an open‑source, broadly applicable framework, Shape2Fate yields quantitative, event‑level maps of membrane trafficking, revealing organizing principles and enabling mechanistic dissection across diverse cellular contexts.
 
-🔬 TIRF-SIM → 🧩 Reconstruction → 🎯 Detection → 🔗 Linking → 🧭 Classification → 📊 Metrics
+🔬 TIRF-SIM → 🧩 Reconstruction → 🎯 Detection → 🔗 Linking → 🧭 Analysis → 📊 Metrics
 
 ### Associated paper
 Manuscript in preparation. DOI and journal link will be added here when available.
