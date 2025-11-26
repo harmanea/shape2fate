@@ -8,8 +8,8 @@
 
 
 <p>
-<a href="https://shape2fate.utia.cas.cz/" target="_blank"><img src="https://img.shields.io/badge/Project%20Page-Shape2Fate-1a5fd1?style=plastic&logo=webflow&logoColor=white"/></a>
-<a href="https://tinyurl.com/shape2fate" target="_blank"><img src="https://img.shields.io/badge/Dataset-Zenodo-1682d4?style=plastic&logo=zenodo&logoColor=white"/></a>
+<a href="https://shape2fate.utia.cas.cz/"><img src="https://img.shields.io/badge/Project%20Page-Shape2Fate-1a5fd1?style=plastic&logo=webflow&logoColor=white"/></a>
+<a href="https://tinyurl.com/shape2fate"><img src="https://img.shields.io/badge/Dataset-Zenodo-1682d4?style=plastic&logo=zenodo&logoColor=white"/></a>
 <img src="https://img.shields.io/badge/Citation-Coming%20Soon-b02525?style=plastic&logo=readthedocs&logoColor=white"/>
 <img src="https://img.shields.io/badge/Python-3.9%2B-3776ab?style=plastic&logo=python&logoColor=white"/>
 </p>
@@ -156,7 +156,7 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
 
 ## Datasets
 Curated training, validation, and demo datasets are now publicly available on Zenodo:
-<a href="https://tinyurl.com/shape2fate" target="_blank"><img src="https://img.shields.io/badge/Dataset-Zenodo-1682d4?style=plastic&logo=zenodo&logoColor=white"/></a>
+<a href="https://tinyurl.com/shape2fate"><img src="https://img.shields.io/badge/Dataset-Zenodo-1682d4?style=plastic&logo=zenodo&logoColor=white"/></a>
 
 ## How to cite
 If you use shape2fate in your research, please cite:
