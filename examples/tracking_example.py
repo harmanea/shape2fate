@@ -202,7 +202,7 @@ if __name__ == "__main__":
     metrics_path = os.path.join(DATA_DIR, "metrics.txt")
     print(f"Saving metrics to: {metrics_path} ... ", end="", flush=True)
 
-    with open(metrics_path, "w") as f:
+    with open(metrics_path, "w", encoding="utf-8") as f:
         f.write(f"MOTA:      {np.mean(motas):.4f}\n")
         f.write(f"1 - MOTP:  {np.mean(motps):.4f}\n")
         f.write(f"HOTA:      {np.mean(hotas):.4f}\n")
