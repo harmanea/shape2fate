@@ -67,9 +67,9 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
 0. Requirements
 
   Before installing shape2fate, make sure you have:
-     * Python 3.9–3.12
-     * Git installed on your system
-     * (Optional) A CUDA-capable GPU for GPU acceleration
+     - Python 3.9–3.12
+     - Git installed on your system
+     - (Optional) A CUDA-capable GPU for GPU acceleration
 
 1. Clone the repository
 
