@@ -11,9 +11,7 @@
 <a href="https://shape2fate.utia.cas.cz/"><img src="https://img.shields.io/badge/Project%20Page-Shape2Fate-1a5fd1?style=plastic&logo=webflow&logoColor=white"/></a>
 
 
-<img src="https://img.shields.io/badge/Dataset-Test-8a2be2?style=plastic&logo=databricks&logoColor=white"/>
-
-<img src="https://img.shields.io/badge/Dataset-Zenodo-1682d4?style=plastic&logo=zenodo&logoColor=white"/>
+<a href="https://tinyurl.com/shape2fate"><img src="https://img.shields.io/badge/Dataset-Zenodo-1682d4?style=plastic&logo=zenodo&logoColor=white"/></a>
 
 <img src="https://img.shields.io/badge/Citation-Coming%20Soon-b02525?style=plastic&logo=readthedocs&logoColor=white"/>
 
@@ -161,7 +159,8 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
 - `pyproject.toml` — package metadata and dependencies.
 
 ## Datasets
-Curated training, validation, and demo datasets are being packaged for public download. A dedicated dataset page with access links and detailed descriptions will be available here soon.
+Curated training, validation, and demo datasets are now publicly available on Zenodo:
+<a href="https://tinyurl.com/shape2fate"><img src="https://img.shields.io/badge/Dataset-Zenodo-1682d4?style=plastic&logo=zenodo&logoColor=white"/></a>
 
 ## How to cite
 If you use shape2fate in your research, please cite:
