@@ -162,6 +162,6 @@ Questions or feedback? Reach out at **shape2fate@utia.cas.cz**.
 
 <div align="center">
   <sub>
-    <img src="assets/imgs/logos.png" alt="Shape2Fate partners" width="70%" />
+    <img src="assets/imgs/logos.png" alt="Shape2Fate partners" width="80%" />
   </sub>
 </div>
