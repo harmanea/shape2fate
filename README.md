@@ -64,29 +64,29 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
 
 ### Install locally
 
-0. Requirements
+1. Requirements
 
-  Before installing shape2fate, make sure you have:
+   Before installing shape2fate, make sure you have:
 
    * Python 3.9–3.12
    * Git installed on your system
    * (Optional) A CUDA-capable GPU for GPU acceleration
 
-1. Clone the repository
+2. Clone the repository
 
    ```bash
    git clone https://github.com/harmanea/shape2fate.git
    cd shape2fate
    ```
 
-2. (Optional) Create and activate a virtual environment
+3. (Optional) Create and activate a virtual environment
 
    ```bash
    python -m venv .venv
    source .venv/bin/activate   # On Windows: .venv\Scripts\activate
    ```
 
-3. Install the package
+4. Install the package
 
    ```bash
    pip install .
@@ -100,7 +100,7 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
 
    **NOTE:** Optional dependencies are required to run the example and benchmarking scripts.
 
-4. Run a quick test
+5. Run a quick test
 
    ```bash
    python -c "import shape2fate; print(shape2fate.__version__)"
@@ -108,7 +108,7 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
 
    **NOTE:** If the installation was successful, this command will print a version number such as: `0.1.0`
 
-5. (Optional) Run a SIM reconstruction example
+6. (Optional) Run a SIM reconstruction example
 
    ```bash
    python examples/reconstruction_example.py
@@ -123,7 +123,7 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
 
      * `reconstruction.tiff` – the reconstructed TIRF-SIM time series
 
-6. (Optional) Reproduce the tracking results from the paper
+7. (Optional) Reproduce the tracking results from the paper
 
    ```bash
    python examples/tracking_example.py
