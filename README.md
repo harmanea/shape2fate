@@ -106,7 +106,7 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
    python -c "import shape2fate; print(shape2fate.__version__)"
    ```
 
-   **NOTE:** If the installation was successful, this command will print a version number such as: `0.1.0`
+   If the installation was successful, this command will print a Shape2Fate version number such as: `0.1.0`
 
 6. (Optional) Run a SIM reconstruction example
 
