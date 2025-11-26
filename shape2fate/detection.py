@@ -53,9 +53,7 @@ def generate_ccp_detections(model: torch.nn.Module, device: torch.device, images
         peaks = feature.peak_local_max(predictions, threshold_abs=0.1)
         peak_values = predictions[tuple(peaks.T)]
 
-        # clusters = _find_clusters(peaks)
-        clusters = []
-        
+        clusters = _find_clusters(peaks)
         detections, detection_classes = _merge_clusters(clusters, peaks.astype(np.float64), peak_values)
 
         x_coords.append(detections[:, 1])
