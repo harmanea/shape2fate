@@ -2,7 +2,7 @@
   <img src="assets/imgs/head.png" alt="shape2fate header" width="100%" />
 
 <h1>Shape2Fate</h1>
-<p><strong>A morphology-aware deep learning framework for tracking endocytic and exocytic carriers in super-resolution.</strong></p>
+<p><h2>A morphology-aware deep learning framework for tracking endocytic and exocytic carriers in super-resolution.</h2></p>
 
 
 
