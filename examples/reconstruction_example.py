@@ -20,9 +20,6 @@ CERT_PATH = os.path.join(DATA_DIR, "chain-harica-cross.pem")
 DATA_URL = "https://shape2fate.utia.cas.cz/files/endocytosis/shape2fate1.0_107.zip"
 ZIP_PATH = os.path.join(DATA_DIR, "test_data.zip")
 
-MATCHING_THRESHOLD = 5
-
-
 def download_file(url, dest_path, context=None):
     with urlopen(Request(url), timeout=10, context=context) as resp, open(dest_path, "wb") as f:
         if resp.status != 200:
