@@ -146,7 +146,7 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
   - `linking.py` — trajectory assembly, untangling, filtering, and class-based linking helpers.
   - `metrics.py` — trajectory-level evaluation metrics (MOTA, HOTA, μTIOU, per-class summaries).
   - `synthetic_data.py` — generators for realistic synthetic TIF-SIM movies and labels used for training.
-  - `utils.py` — shared utilities for data loading, normalization, padding, and batching.
+  - `utils.py` — utilities for opening microscopy image files across multiple formats.
   - `sim.py` — SIM illumination geometry helpers (diffraction limits, carrier shifts, separation matrices).
 - `examples/` — runnable scripts that download sample datasets and reproduce the reconstruction and tracking pipelines from the paper.
   - `reconstruction_example.py` — full SIM reconstruction demo with automatic parameter estimation.
