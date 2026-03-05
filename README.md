@@ -2,7 +2,7 @@
   <img src="assets/imgs/head.png" alt="shape2fate header" width="100%" />
 
 <h1>Shape2Fate</h1>
-<p><strong>A morphology-aware deep learning framework for tracking endocytic and exocytic carriers in super-resolution.</strong></p>
+<p><strong>A morphology-aware deep learning framework for tracking endocytic and exocytic carriers at nanoscale.</strong></p>
 
 
 
@@ -32,7 +32,7 @@
 ## Overview
 
 ### Abstract
-Plasma membrane homeostasis depends on balanced exocytosis and endocytosis, yet their spatiotemporal coordination has been difficult to resolve. We present Shape2Fate, a fully automated, shape-aware deep-learning pipeline that resolves individual exocytic and endocytic carriers in live-cell TIRF-SIM movies. Unlike conventional intensity-based approaches, Shape2Fate exploits morphology: it detects trafficking carriers, tracks them across lifetime shape changes, and classifies cargo-delivery outcomes from their shape evolution. Trained entirely on realistic synthetic data, Shape2Fate reconstructs complete trajectories in crowded scenes and matches expert-level tracking accuracy on experimental data. Using Shape2Fate, we uncover distinct coupling architectures across local and global scales and in spatial and temporal hierarchies: exocytic fusion can initiate clathrin‑coated pits (CCPs), whereas in other contexts exocytic carriers target pre‑existing CCP hotspots for immediate cargo capture. As an open‑source, broadly applicable framework, Shape2Fate yields quantitative, event‑level maps of membrane trafficking, revealing organizing principles and enabling mechanistic dissection across diverse cellular contexts.
+Plasma membrane homeostasis depends on balanced exocytosis and endocytosis, yet their spatiotemporal coordination has been difficult to resolve at the single-event level. We present Shape2Fate, a fully automated, shape-aware deep-learning pipeline that detects, tracks, and classifies individual exocytic and endocytic carriers in live-cell total internal reflection fluorescence structured illumination microscopy (TIRF-SIM) movies at ~100 nm resolution. Rather than relying on intensity, Shape2Fate exploits carrier morphology to classify cargo-delivery outcomes from shape evolution. Trained entirely on realistic synthetic data requiring no manual annotation, Shape2Fate reaches expert-level tracking accuracy across microscope platforms and cell types. Applying Shape2Fate to synchronized RUSH exocytosis and insulin-stimulated GLUT4 trafficking in adipocytes, we uncover an inverse coupling hierarchy: RUSH fusion nucleates de novo clathrin-coated pits (CCPs), whereas adipocyte exocytic carriers target pre-existing CCPs for rapid cargo capture. As an open-source framework, Shape2Fate yields quantitative, event-level maps of exo–endocytic coordination, enabling mechanistic dissection across cell types and pathways.
 
 🔬 TIRF-SIM → 🧩 Reconstruction → 🎯 Detection → 🔗 Linking → 🧭 Analysis → 📊 Metrics
 
