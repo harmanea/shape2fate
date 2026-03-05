@@ -24,6 +24,7 @@
   - [Try in Colab](#try-in-colab)
   - [Install locally](#install-locally)
 - [Repository tour](#repository-tour)
+- [Model Zoo](#model-zoo)
 - [Datasets](#datasets)
 - [How to cite](#how-to-cite)
 - [Contact](#contact)
@@ -153,6 +154,18 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
   - `tracking_example.py` — detection, linking, and metrics reporting demo.
 - `assets/` — static images used in the README and other documentation.
 - `pyproject.toml` — package metadata and dependencies.
+
+## Model Zoo
+Pretrained model checkpoints for all Shape2Fate pipeline stages are available in the [`model_zoo/`](model_zoo/) directory. Each checkpoint can be loaded directly with PyTorch for inference or fine-tuning.
+
+| Checkpoint | Architecture | Task |
+|---|---|---|
+| [`ccp-detector-sandy-wildflower-269.pt`](model_zoo/ccp-detector-sandy-wildflower-269.pt) | UNet | Endocytosis — clathrin-coated pit detection |
+| [`exo-detector-rural-wind-13.pt`](model_zoo/exo-detector-rural-wind-13.pt) | UNet (2-ch) | Exocytosis — RUSH carrier detection |
+| [`exo-fusion-detector-giddy-yogurt-32.pt`](model_zoo/exo-fusion-detector-giddy-yogurt-32.pt) | TransformerModel | Exocytosis — fusion productivity classification |
+| *coming soon* | *TBD* | Exocytosis — adipocyte carrier detection |
+
+For full details on each model (architecture parameters, usage examples, and training data), see the **[Model Zoo documentation](model_zoo/MODEL_ZOO.md)**.
 
 ## Datasets
 Curated training, validation, and demo datasets are now publicly available on <a href="https://zenodo.org/records/17484958?preview=1&token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6Ijk0ZjAwYTNmLTFmMjAtNDU5OC1hNzg0LWVlMzU2NDBmMTVkOSIsImRhdGEiOnt9LCJyYW5kb20iOiIzODY4N2UzNGU2ZDliZWU0NzkxYWY3MWZjYTY2ODlmMCJ9.1iB2EY24RCWNhp42zlMuipO8s_ngifxkJjytFsnnt7h-6t0mmAgIcq-BedkSaOMaTAkU5n9wjPhTZEDgAMdpbA">Zenodo</a>:
