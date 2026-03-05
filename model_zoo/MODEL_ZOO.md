@@ -60,6 +60,16 @@ model.eval()
 
 ---
 
+### Adipocyte Exocytosis Detector — *coming soon*
+
+| | |
+|---|---|
+| **Task** | Detection of exocytic carriers in adipocyte (insulin-stimulated GLUT4) TIRF-SIM movies |
+| **Architecture** | TBD |
+| **Checkpoint** | TBD |
+
+---
+
 ### Exocytosis Fusion Classifier — `exo-fusion-detector-giddy-yogurt-32.pt`
 
 | | |
@@ -93,21 +103,11 @@ model.eval()
 
 ---
 
-### Adipocyte Exocytosis Detector — *coming soon*
-
-| | |
-|---|---|
-| **Task** | Detection of exocytic carriers in adipocyte (insulin-stimulated GLUT4) TIRF-SIM movies |
-| **Architecture** | TBD |
-| **Checkpoint** | TBD |
-
----
-
 ## Summary
 
 | Checkpoint | Architecture | Task | Params |
 |---|---|---|---|
 | `ccp-detector-sandy-wildflower-269.pt` | UNet | Endocytosis CCP detection | ~120 K |
 | `exo-detector-rural-wind-13.pt` | UNet (2-ch out) | RUSH exocytosis detection | ~120 K |
-| `exo-fusion-detector-giddy-yogurt-32.pt` | TransformerModel | Fusion productivity classification | ~15 K |
 | *TBD* | *TBD* | Adipocyte exocytosis detection | *TBD* |
+| `exo-fusion-detector-giddy-yogurt-32.pt` | TransformerModel | Fusion productivity classification | ~15 K |
