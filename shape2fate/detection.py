@@ -53,8 +53,7 @@ def generate_ccp_detections(model: torch.nn.Module, device: torch.device, images
         peaks = feature.peak_local_max(predictions, threshold_abs=0.1)
         peak_values = predictions[tuple(peaks.T)]
 
-        clusters = _find_clusters(peaks)
-        detections, detection_classes = _merge_clusters(clusters, peaks.astype(np.float64), peak_values)
+        detections, detection_classes = _merge_adjacent_peaks(peaks, peak_values)
 
         x_coords.append(detections[:, 1])
         y_coords.append(detections[:, 0])
@@ -71,71 +70,60 @@ def generate_ccp_detections(model: torch.nn.Module, device: torch.device, images
     return pd.DataFrame(data)
 
 
-def _find_clusters(detections: np.ndarray) -> list[list[int]]:
+def _merge_adjacent_peaks(peaks: np.ndarray, classes: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     Find clusters of detections whose integer coordinates are directly next to each other.
     Multiple such cases are collapsed into a single cluster.
-
-    :param detections: An array of (y, x) coordinates
-    :return: a list of found clusters; each sublist contains indices of detections in that cluster
     """
-    distances = spatial.distance.cdist(detections, detections, metric='euclidean')
 
-    clusters: dict[int, set[int]] = {}
-    assignments: dict[int, int] = {}
+    if len(peaks) == 0:
+        return peaks.astype(np.float64), classes
 
-    k = 0
-    for i, j in zip(*(distances == 1).nonzero()):
-        if i > j:
+    ys = peaks[:, 0].astype(int)
+    xs = peaks[:, 1].astype(int)
+
+    y0 = ys.min()
+    y1 = ys.max()
+    x0 = xs.min()
+    x1 = xs.max()
+
+    h = y1 - y0 + 1
+    w = x1 - x0 + 1
+
+    mask = np.zeros((h, w), dtype=np.uint8)
+    ys_local = ys - y0
+    xs_local = xs - x0
+    mask[ys_local, xs_local] = 1
+
+    _, labels_img = cv.connectedComponents(mask, connectivity=4)
+    det_labels = labels_img[ys_local, xs_local]
+
+    clusters: dict[int, list[int]] = {}
+    for idx, lab in enumerate(det_labels):
+        clusters.setdefault(int(lab), []).append(idx)
+
+    merged_coords = []
+    merged_classes = []
+    clustered_mask = np.zeros(len(peaks), dtype=bool)
+
+    for l, inds in clusters.items():
+        if l == 0 or len(inds) < 2:
             continue
+        inds_arr = np.asarray(inds, dtype=int)
+        merged_coords.append(peaks[inds_arr].mean(axis=0))
+        merged_classes.append(classes[inds_arr[0]])
+        clustered_mask[inds_arr] = True
 
-        if i in assignments:
-            if j in assignments:
-                if assignments[i] == assignments[j]:
-                    continue
+    if merged_coords:
+        merged_coords = np.vstack(merged_coords)
+        merged_classes = np.asarray(merged_classes)
+        out_coords = np.concatenate([merged_coords, peaks[~clustered_mask]], axis=0)
+        out_classes = np.concatenate([merged_classes, classes[~clustered_mask]], axis=0)
+    else:
+        out_coords = peaks
+        out_classes = classes
 
-                # Merge clusters
-                old_assignment = assignments[j]
-                for value in clusters[old_assignment]:
-                    clusters[assignments[i]].add(value)
-                    assignments[value] = assignments[i]
-                clusters.pop(old_assignment)
-
-            else:
-                clusters[assignments[i]].add(j)
-                assignments[j] = assignments[i]
-
-        elif j in assignments:
-            clusters[assignments[j]].add(i)
-            assignments[i] = assignments[j]
-
-        else:
-            # Add a new cluster
-            clusters[k] = {i, j}
-            assignments[i] = k
-            assignments[j] = k
-            k += 1
-
-    return [list(cluster) for cluster in clusters.values()]
-
-
-def _merge_clusters(clusters: list[list[int]], detections: np.ndarray, classes: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    if clusters:
-        merged_detections = []
-        merged_classes = []
-
-        # Keep track of which detections and classes were merged
-        merged = np.full(len(detections), False)
-
-        for cluster in clusters:
-            merged_detections.append(np.mean(detections[cluster], 0))
-            merged_classes.append(classes[cluster[0]])
-            merged[cluster] = True
-
-        detections = np.concatenate([np.array(merged_detections), detections[~merged]])
-        classes = np.concatenate([np.array(merged_classes), classes[~merged]])
-
-    return detections, classes
+    return out_coords.astype(np.float64), out_classes
 
 
 def normalize_img(img: np.ndarray) -> np.ndarray:
