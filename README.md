@@ -11,7 +11,7 @@
 <a href="https://shape2fate.utia.cas.cz/"><img src="https://img.shields.io/badge/Project%20Page-Shape2Fate-1a5fd1?style=plastic&logo=webflow&logoColor=white"/></a>
 <a href="https://zenodo.org/records/17484958?preview=1&token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6Ijk0ZjAwYTNmLTFmMjAtNDU5OC1hNzg0LWVlMzU2NDBmMTVkOSIsImRhdGEiOnt9LCJyYW5kb20iOiIzODY4N2UzNGU2ZDliZWU0NzkxYWY3MWZjYTY2ODlmMCJ9.1iB2EY24RCWNhp42zlMuipO8s_ngifxkJjytFsnnt7h-6t0mmAgIcq-BedkSaOMaTAkU5n9wjPhTZEDgAMdpbA"><img src="https://img.shields.io/badge/Dataset-Zenodo-1682d4?style=plastic&logo=zenodo&logoColor=white"/></a>
 <img src="https://img.shields.io/badge/Citation-Coming%20Soon-b02525?style=plastic&logo=readthedocs&logoColor=white"/>
-<img src="https://img.shields.io/badge/Python-3.9%2B-3776ab?style=plastic&logo=python&logoColor=white"/>
+<img src="https://img.shields.io/badge/Python-3.10%2B-3776ab?style=plastic&logo=python&logoColor=white"/>
 </p>
 </div>
 
@@ -63,7 +63,7 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
 
    Before installing shape2fate, make sure you have:
 
-   * Python 3.9–3.12 ‼️
+   * Python 3.10–3.12 ‼️
    * Git installed on your system
    * (Optional) A CUDA-capable GPU for GPU acceleration
 
