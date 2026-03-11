@@ -143,12 +143,12 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
   - `parameter_estimation.py` — automatic estimation of SIM shifts, phases, amplitudes, and frequencies from raw data.
   - `reconstruction.py` — CPU/GPU reconstruction pipeline with preprocessing, padding, filtering, and OTF mapping.
   - `detection.py` — shape-aware exocytosis/endocytosis detection routines and post-processing.
-  - `models.py` — deep-learning architectures used for detector training and inference.
-  - `linking.py` — trajectory assembly, untangling, filtering, and class-based linking helpers.
-  - `metrics.py` — trajectory-level evaluation metrics (MOTA, HOTA, μTIOU, per-class summaries).
-  - `synthetic_data.py` — generators for realistic synthetic TIRF-SIM movies and labels used for training.
-  - `utils.py` — utilities for opening microscopy image files across multiple formats.
-  - `sim.py` — SIM illumination geometry helpers (diffraction limits, carrier shifts, separation matrices).
+  - `models.py` — deep-learning architectures (detector and classifier) used for training and inference.
+  - `linking.py` — trajectory assembly, untangling, and configurable linking.
+  - `metrics.py` — trajectory-level evaluation metrics (MOTA, HOTA, μTIOU).
+  - `synthetic_data.py` — generators for realistic synthetic TIRF-SIM training images and labels.
+  - `utils.py` — utilities for opening and saving microscopy image files across multiple formats.
+  - `sim.py` — SIM illumination geometry helpers (diffraction limits, illumination patterns, separation matrices).
 - `examples/` — runnable scripts that download sample datasets and reproduce the reconstruction and tracking pipelines from the paper.
   - `reconstruction_example.py` — full SIM reconstruction demo with automatic parameter estimation.
   - `tracking_example.py` — detection, linking, and metrics reporting demo.
