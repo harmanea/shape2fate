@@ -160,10 +160,10 @@ Pretrained model checkpoints for all Shape2Fate pipeline stages are available in
 
 | Checkpoint | Architecture | Task |
 |---|---|---|
-| [`ccp-detector-sandy-wildflower-269.pt`](model_zoo/ccp-detector.pt) | UNet | Endocytosis — CCP detection |
-| [`ccp-detector-sandy-feather-310.pt`](model_zoo/ccp-detector-adipocyte.pt) | UNet | Endocytosis — adipocyte CCP detection |
-| [`exo-detector-rural-wind-13.pt`](model_zoo/exo-detector.pt) | UNet (2-ch) | Exocytosis — RUSH carrier detection |
-| [`exo-fusion-detector-giddy-yogurt-32.pt`](model_zoo/exo-fusion-detector.pt) | TransformerModel | Exocytosis — fusion productivity classification |
+| [`ccp-detector`](model_zoo/ccp-detector-sandy-wildflower-269.pt) | UNet | Endocytosis — CCP detection |
+| [`ccp-detector-adipocyte`](model_zoo/ccp-detector-sandy-feather-310.pt) | UNet | Endocytosis — adipocyte CCP detection |
+| [`exo-detector`](model_zoo/exo-detector-rural-wind-13.pt) | UNet (2-ch) | Exocytosis — RUSH carrier detection |
+| [`exo-fusion-detector`](model_zoo/exo-fusion-detector-giddy-yogurt-32.pt) | TransformerModel | Exocytosis — fusion productivity classification |
 
 For full details on each model (architecture parameters, usage examples, and training data), see the **[Model Zoo documentation](model_zoo/MODEL_ZOO.md)**.
 
