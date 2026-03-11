@@ -124,6 +124,7 @@ model.eval()
 | Checkpoint | Architecture | Task | Params |
 |---|---|---|---|
 | `ccp-detector-sandy-wildflower-269.pt` | UNet | Endocytosis CCP detection | 450,193 |
+| `ccp-detector-sandy-feather-310.pt` | UNet | Adipocyte CCP detection | 450,193 |
 | `exo-detector-rural-wind-13.pt` | UNet (2-ch out) | RUSH exocytosis detection | 450,210 |
-| *TBD* | *TBD* | Adipocyte exocytosis detection | *TBD* |
 | `exo-fusion-detector-giddy-yogurt-32.pt` | TransformerModel | Fusion productivity classification | 22,377 |
+
