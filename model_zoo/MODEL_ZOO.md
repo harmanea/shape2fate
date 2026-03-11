@@ -112,8 +112,7 @@ model = models.TransformerModel(
     fc_dropout=0.5
 )
 checkpoint = torch.load('model_zoo/exo-fusion-detector-giddy-yogurt-32.pt', map_location='cpu')
-state_dict = checkpoint.get('model_state_dict', checkpoint)
-model.load_state_dict(state_dict)
+model.load_state_dict(checkpoint)
 model.eval()
 ```
 
