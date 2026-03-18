@@ -168,9 +168,9 @@ Pretrained model checkpoints for all Shape2Fate pipeline stages are available in
 For full details on each model (architecture parameters, usage examples, and training data), see the **[Model Zoo documentation](model_zoo/MODEL_ZOO.md)**.
 
 ## Datasets
-Curated training, validation, and demo datasets are now publicly available on <a href="https://zenodo.org/records/17484958?preview=1&token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6Ijk0ZjAwYTNmLTFmMjAtNDU5OC1hNzg0LWVlMzU2NDBmMTVkOSIsImRhdGEiOnt9LCJyYW5kb20iOiIzODY4N2UzNGU2ZDliZWU0NzkxYWY3MWZjYTY2ODlmMCJ9.1iB2EY24RCWNhp42zlMuipO8s_ngifxkJjytFsnnt7h-6t0mmAgIcq-BedkSaOMaTAkU5n9wjPhTZEDgAMdpbA">Zenodo</a>:
+Curated training, validation, and demo datasets are now publicly available on <a href="https://shape2fate.utia.cas.cz/dataset">Zenodo</a>:
 
-<a href="https://zenodo.org/records/17484958?preview=1&token=eyJhbGciOiJIUzUxMiJ9.eyJpZCI6Ijk0ZjAwYTNmLTFmMjAtNDU5OC1hNzg0LWVlMzU2NDBmMTVkOSIsImRhdGEiOnt9LCJyYW5kb20iOiIzODY4N2UzNGU2ZDliZWU0NzkxYWY3MWZjYTY2ODlmMCJ9.1iB2EY24RCWNhp42zlMuipO8s_ngifxkJjytFsnnt7h-6t0mmAgIcq-BedkSaOMaTAkU5n9wjPhTZEDgAMdpbA"><img src="https://img.shields.io/badge/Dataset-Zenodo-1682d4?style=plastic&logo=zenodo&logoColor=white"/></a>
+<a href="https://shape2fate.utia.cas.cz/dataset"><img src="https://img.shields.io/badge/Dataset-Zenodo-1682d4?style=plastic&logo=zenodo&logoColor=white"/></a>
 
 ## How to cite
 If you use shape2fate in your research, please cite:
