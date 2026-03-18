@@ -53,9 +53,9 @@ Manuscript in preparation. DOI and journal link will be added here when availabl
 <br />
 
 Jump straight into the workflows in your browser, each notebook is preloaded with example data and the necessary dependencies:
-- <a href="https://shape2fate.utia.cas.cz/colab-endocytosis/"><img src="https://img.shields.io/badge/Colab-Endocytosis-f9b234?style=plastic&logo=googlecolab&logoColor=white"/></a> Reconstruct, detect, and track endocytic events in TIRF-SIM data.
-- <a href="https://shape2fate.utia.cas.cz/colab-exocytosis/"><img src="https://img.shields.io/badge/Colab-Exocytosis-f9b234?style=plastic&logo=googlecolab&logoColor=white"/></a> Reconstruct, detect, and track exocytic events in TIRF-SIM data.
-- <a href="https://shape2fate.utia.cas.cz/colab-detector/"><img src="https://img.shields.io/badge/Colab-Detector-f9b234?style=plastic&logo=googlecolab&logoColor=white"/></a> Train a custom detector for clathrin-coated pits.
+- <a href="https://shape2fate.utia.cas.cz/colab-endocytosis/" target="_blank"><img src="https://img.shields.io/badge/Colab-Endocytosis-f9b234?style=plastic&logo=googlecolab&logoColor=white"/></a> Reconstruct, detect, and track endocytic events in TIRF-SIM data.
+- <a href="https://shape2fate.utia.cas.cz/colab-exocytosis/" target="_blank"><img src="https://img.shields.io/badge/Colab-Exocytosis-f9b234?style=plastic&logo=googlecolab&logoColor=white"/></a> Reconstruct, detect, and track exocytic events in TIRF-SIM data.
+- <a href="https://shape2fate.utia.cas.cz/colab-detector/" target="_blank"><img src="https://img.shields.io/badge/Colab-Detector-f9b234?style=plastic&logo=googlecolab&logoColor=white"/></a> Train a custom detector for clathrin-coated pits.
 
 ### Install locally
 
