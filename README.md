@@ -177,7 +177,7 @@ If you use Shape2Fate in your research, please cite:
 ```
 @article{harmanec2026shape2fate,
   title={Shape2Fate: a morphology-aware deep learning framework for tracking endocytic and exocytic carriers at nanoscale},
-  author={Harmanec, Adam and Dagg, Alexander D and Kamenicky, Jan and Kerepecky, Tomas and Makieieva, Yelyzaveta and Pereira, Maria da Concei{\c{c}}{\~a}o and Bright, Nicholas and Menon, Dilip and Gerschlick, David and Vaskovicova, Nadezda and Lai, Tiffany and Fazakerley, Daniel and Schermelleh, Lothar and Sroubek, Filip and Kadlecova, Zuzana},
+  author={Harmanec, Adam and Dagg, Alexander D and Kamenicky, Jan and Kerepecky, Tomas and Makieieva, Yelyzaveta and Pereira, Concei{\c{c}}{\~a}o and Bright, Nicholas and Menon, Dilip and Gershlick, David C and Vaskovicova, Nadezda and Lai, Tiffany and Fazakerley, Daniel J. and Schermelleh, Lothar and Sroubek, Filip and Kadlecova, Zuzana},
   journal={bioRxiv},
   year={2026},
   doi={10.64898/2026.03.29.715120}
