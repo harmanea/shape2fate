@@ -38,7 +38,7 @@ Plasma membrane homeostasis depends on balanced exocytosis and endocytosis, yet 
 🔬 TIRF-SIM → 🧩 Reconstruction → 🎯 Detection → 🔗 Linking → 🧭 Analysis → 📊 Metrics
 
 ### Associated paper
-Harmanec, A., Dagg, A.D., Kamenicky, J., Kerepecky, T., Makieieva, Y., Pereira, M.C., Bright, N., Menon, D., Gerschlick, D., Vaskovicova, N., Lai, T., Fazakerley, D., Schermelleh, L., Sroubek, F., & Kadlecova, Z. (2026). Shape2Fate: a morphology-aware deep learning framework for tracking endocytic and exocytic carriers at nanoscale. *bioRxiv*. [doi:10.64898/2026.03.29.715120](https://www.biorxiv.org/content/10.64898/2026.03.29.715120v1)
+Harmanec, A. et al. (2026). Shape2Fate: a morphology-aware deep learning framework for tracking endocytic and exocytic carriers at nanoscale. *bioRxiv*. [doi:10.64898/2026.03.29.715120](https://www.biorxiv.org/content/10.64898/2026.03.29.715120v1)
 
 ### Key capabilities
 - Structured illumination microscopy (SIM) reconstruction with automatic parameter estimation and optional GPU acceleration.
