@@ -173,8 +173,16 @@ Curated training, validation, and demo datasets are now publicly available on <a
 <a href="https://shape2fate.utia.cas.cz/dataset"><img src="https://img.shields.io/badge/Dataset-Zenodo-1682d4?style=plastic&logo=zenodo&logoColor=white"/></a>
 
 ## How to cite
-If you use shape2fate in your research, please cite:
-- Citation details will be posted here soon.
+If you use Shape2Fate in your research, please cite:
+```
+```
+@article{harmanec2026shape2fate,
+  title={Shape2Fate: a morphology-aware deep learning framework for tracking endocytic and exocytic carriers at nanoscale},
+  author={Harmanec, Adam and Dagg, Alexander D and Kamenicky, Jan and Kerepecky, Tomas and Makieieva, Yelyzaveta and Pereira, Maria da Concei{\c{c}}{\~a}o and Bright, Nicholas and Menon, Dilip and Gerschlick, David and Vaskovicova, Nadezda and Lai, Tiffany and Fazakerley, Daniel and Schermelleh, Lothar and Sroubek, Filip and Kadlecova, Zuzana},
+  journal={bioRxiv},
+  year={2026},
+  doi={10.64898/2026.03.29.715120}
+}
 
 ## Contact
 Questions or feedback? Reach out at **shape2fate@utia.cas.cz**.
