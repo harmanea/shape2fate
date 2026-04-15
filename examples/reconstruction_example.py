@@ -17,7 +17,7 @@ import shape2fate.utils
 DATA_DIR = "./data"
 CERT_URL = "https://pki.cesnet.cz/_media/certs/chain-harica-rsa-ov-crosssigned-root.pem"
 CERT_PATH = os.path.join(DATA_DIR, "chain-harica-cross.pem")
-DATA_URL = "https://shape2fate.utia.cas.cz/files/endocytosis/shape2fate1.0_107.zip"
+DATA_URL = "https://shape2fate.utia.cas.cz/files/endocytosis/github_shape2fate1.0_107.zip"
 ZIP_PATH = os.path.join(DATA_DIR, "test_data.zip")
 
 def download_file(url, dest_path, context=None):
