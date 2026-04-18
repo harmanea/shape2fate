@@ -23,6 +23,7 @@
 - [Quick start](#quick-start)
   - [Try in Colab](#try-in-colab)
   - [Install locally](#install-locally)
+  - [Using your own data](#using-your-own-data)
 - [Repository tour](#repository-tour)
 - [Model Zoo](#model-zoo)
 - [Datasets](#datasets)
@@ -67,6 +68,12 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
    * Git installed on your system
    * (Optional) A CUDA-capable GPU for GPU acceleration
 
+   **Tested environment**
+
+   The package is expected to be compatible with most modern operating systems. It has been tested on:
+
+   * Fedora Linux 42
+
 2. Clone the repository
 
    ```bash
@@ -92,8 +99,10 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
    ```bash
    pip install .[io]
    ```
-
+ 
    **NOTE:** Optional dependencies are required to run the example and benchmarking scripts.
+
+   > *On a typical desktop machine, installation takes approximately **~1 min** depending on internet speed and environment configuration.*
 
 5. Run a quick test
 
@@ -118,6 +127,8 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
 
      * `reconstruction.tiff` – the reconstructed TIRF-SIM time series
 
+   > *On a typical desktop machine, this example takes approximately **~3-4 min** (CPU), faster with GPU, depending on internet speed and environment configuration.*
+
 7. (Optional) Reproduce the tracking results from the paper
 
    ```bash
@@ -135,6 +146,16 @@ Jump straight into the workflows in your browser, each notebook is preloaded wit
      * `metrics.txt` – summary tracking metrics (MOTA, HOTA, μTIOU, …)
 
     The script will also print a summary of the tracking metrics to verify the reproduction of the performance reported in the paper.
+
+   > *On a typical desktop machine, this example takes approximately **~5-20 min** (CPU), faster with GPU, depending on internet speed and environment configuration.*
+
+### Using your own data
+
+The easiest way to run Shape2Fate on your own data is via the provided Google Colab notebooks, which demonstrate the full pipeline end-to-end.
+We recommend first testing your data in these notebooks to verify compatibility and expected behavior before running locally.
+
+For local execution, you can follow the example scripts in `examples/`.
+These scripts serve as minimal templates and can be directly adapted to your own datasets by modifying the input paths and parameters.
 
 ## Repository tour
 - `shape2fate/` — core package implementing SIM reconstruction, detection, tracking, metrics, and synthetic-data utilities.
