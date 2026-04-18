@@ -107,39 +107,6 @@ class SyntheticCCPDataset(SyntheticDataset):
         positions = np.column_stack([self.yy[indices], self.xx[indices]]) + offsets
         classes = np.random.beta(self.beta_a, self.beta_b, n) * 0.9 + 0.1
 
-        # Generate a simulated HR image and output target
-        target_distance = classes * self.radius
-        distance = np.hypot(self.yyy[..., None] - positions[:, 0], self.xxx[..., None] - positions[:, 1])
-        abs_distance = np.abs(distance - target_distance)
-        parts = np.where(abs_distance > self.thickness, 0,
-                         np.log(np.interp(abs_distance / self.thickness, [0, 1], [np.e, 1])))
-        full_image = np.sum(parts, -1)
-
-        distances = np.maximum(classes - distance / ((1 - classes) * 2 + self.radius + self.thickness * 2), 0)
-        y = np.minimum(np.sum(distances, -1), 1)
-
-        # Generate simulated SIM image
-        x,_,_ = super()._simulate_sim(full_image)
-
-        return x, y
-
-
-class SyntheticAdipocytesCCPDataset(SyntheticCCPDataset):
-    def __init__(self):
-        super().__init__()
-
-        self.radius = 3.5
-        self.max_offset = 7
-        self.beta_a = 1.5
-
-    def data_sample(self):
-        # Generate positions and classes
-        n = np.random.randint(self.min_n, self.max_n)
-        indices = np.random.choice(len(self.yy), size=n, replace=False)
-        offsets = np.random.uniform(-self.max_offset, self.max_offset, (n, 2))
-        positions = np.column_stack([self.yy[indices], self.xx[indices]]) + offsets
-        classes = np.random.beta(self.beta_a, self.beta_b, n) * 0.9 + 0.1
-
         # Generate offset for each low-resolution frame
         speeds = np.random.exponential(1.5 - classes, n)
         angles = np.random.uniform(0, np.pi * 2, n)
@@ -162,6 +129,15 @@ class SyntheticAdipocytesCCPDataset(SyntheticCCPDataset):
         x,_,_ = super()._simulate_sim(full_images.transpose((2, 0, 1)))
 
         return x, y
+
+
+class SyntheticAdipocytesCCPDataset(SyntheticCCPDataset):
+    def __init__(self):
+        super().__init__()
+
+        self.radius = 3.5
+        self.max_offset = 7
+        self.beta_a = 1.5
 
 
 class SyntheticExocytosisDataset(SyntheticDataset):
