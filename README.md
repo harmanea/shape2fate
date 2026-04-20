@@ -186,7 +186,7 @@ Pretrained model checkpoints for all Shape2Fate pipeline stages are available in
 | [`exo-detector`](model_zoo/exo-detector-rural-wind-13.pt) | UNet (2-ch) | Exocytosis — RUSH carrier detection |
 | [`exo-fusion-detector`](model_zoo/exo-fusion-detector-giddy-yogurt-32.pt) | TransformerModel | Exocytosis — fusion productivity classification |
 
-For full details on each model (architecture parameters, usage examples, and training data), see the **[Model Zoo documentation](model_zoo/MODEL_ZOO.md)**.
+For full details on each model (Model Card - architecture parameters, usage examples, and training data), see the **[Model Zoo documentation](model_zoo/MODEL_ZOO.md)**.
 
 ## Datasets
 Curated training, validation, and demo datasets are now publicly available on <a href="https://shape2fate.utia.cas.cz/dataset">Zenodo</a>:
