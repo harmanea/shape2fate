@@ -81,7 +81,8 @@ Install the package as described in the repository `README.md`, then load the ch
 
 ### Direct Use
 
-Use this checkpoint for CME analysis in the standard CCP regime described in the manuscript, especially for RPE-1-like pit sizes and imaging settings similar to the validation and testing datasets.
+Use this checkpoint for CME analysis in the standard CCP regime described in the associated manuscript,
+especially for RPE-1-like pit sizes and imaging settings similar to the validation and testing datasets.
 
 ### Out-of-Scope Use
 
@@ -113,25 +114,9 @@ No manual framewise detector annotations from experimental images were required 
 
 ### Evaluation
 
-#### Testing data, factors, and metrics
-
-This checkpoint is evaluated in the paper **as part of the full CME pipeline**, not as an isolated detector.
-
-Pipeline-level evaluation used:
-
-- a publicly available **CME tracking validation** dataset,
-- an independently acquired **CME tracking testing** dataset from a different commercial microscope platform,
-- tracking metrics including MOTA, 1-MOTP, HOTA, DetA, AssA, and μTIOU.
-
-#### Results
-
-Standalone detector-only metrics are **not separately reported** in the manuscript.
-
-As part of the full CME pipeline, Shape2Fate:
-
-- achieved performance within the inter-annotator range on the validation benchmark,
-- generalized to an independent CME testing dataset acquired on a different platform,
-- reached human-level performance on difficult cases in blinded paired comparison.
+This checkpoint is used as part of the full Shape2Fate CME pipeline.
+The associated manuscript reports full-pipeline tracking performance on expert-annotated CME validation and independent test datasets,
+but does not report detector-only benchmark metrics for this checkpoint.
 
 ### Known Limitations
 
@@ -192,6 +177,11 @@ Compared with the standard CCP detector, the synthetic generator was adjusted to
 - **Training length:** `300` cycles, `100` batches per cycle
 - **Preprocessing:** per-frame normalization to zero mean and unit standard deviation
 
+### Evaluation
+
+This checkpoint was introduced for the larger adipocyte CCP size regime used in the Shape2Fate pipeline.
+No separate checkpoint-specific benchmark is reported.
+
 ### Known Limitations
 
 - This checkpoint is specialized to the adipocyte CCP size regime studied in the paper.
@@ -227,7 +217,7 @@ model.eval()
 
 ### Direct Use
 
-Use this checkpoint to detect pleomorphic exocytic carriers and candidate fusion events in TIRF-SIM exocytosis workflows that resemble the RUSH or adipocyte systems studied in the manuscript.
+Use this checkpoint to detect pleomorphic exocytic carriers and candidate fusion events in TIRF-SIM exocytosis workflows that resemble the RUSH or adipocyte systems studied in the associated manuscript.
 
 ### Out-of-Scope Use
 
@@ -258,24 +248,9 @@ The synthetic generator includes:
 
 ### Evaluation
 
-#### Testing data, factors, and metrics
-
-This checkpoint is evaluated in the paper **as part of the full exocytosis tracking pipeline** on an expert-annotated RUSH test set.
-
-Pipeline-level metrics reported for exocytosis tracking are:
-
-- **MOTA:** `0.53`
-- **1-MOTP:** `0.69`
-- **HOTA:** `0.72`
-- **DetA:** `0.67`
-- **AssA:** `0.77`
-- **μTIOU:** `0.45`
-
-#### Results
-
-The paper reports that Shape2Fate tracked the arrival and fusion of most annotated exocytic carriers on the RUSH test set (`745` carrier trajectories; approximately `25,000` detections).
-
-These are **integrated pipeline metrics**, not isolated detector metrics.
+This checkpoint is used within the full Shape2Fate exocytosis pipeline.
+The associated manuscript reports full-pipeline exocytosis tracking performance on an expert-annotated RUSH test set,
+but does not report detector-only benchmark metrics for this checkpoint.
 
 ### Known Limitations
 
@@ -350,32 +325,22 @@ Reported class counts:
 
 ### Evaluation
 
-#### Testing data, factors, and metrics
+#### Validation data and metrics
 
-The manuscript compares this model against the pre-trained **IVEA** model under matched TIRF-resolution input conditions.
-
-Reported validation metrics for Shape2Fate:
+This checkpoint was evaluated on independent validation cells. Reported validation metrics are:
 
 - **Accuracy:** `0.93`
 - **Precision:** `0.89`
 - **Recall:** `0.90`
 - **F1:** `0.90`
 
-Reported comparison values for IVEA (as listed in the manuscript supplementary table):
-
-- **IVEA raw:** accuracy `0.68`, precision `0.15`, recall `0.59`, F1 `0.23`
-- **IVEA avg 3:** accuracy `0.74`, precision `0.26`, recall `0.87`, F1 `0.40`
-- **IVEA slid. win.:** accuracy `0.67`, precision `0.03`, recall `0.89`, F1 `0.06`
-
-#### Results
-
-The manuscript reports that, under matched TIRF-resolution conditions, the Shape2Fate fusion classifier substantially outperformed the pre-trained IVEA model for productive exocytosis classification.
+Under matched TIRF-resolution input conditions, Shape2Fate outperformed the pre-trained IVEA model for productive exocytosis classification.
 
 ### Known Limitations
 
-- The model is trained on the two exocytic systems used in the paper and may require retraining for different reporters, temporal sampling schemes, or microscope regimes.
+- The model is trained on the two exocytic systems used in the associated manuscript and may require retraining for different reporters, temporal sampling schemes, or microscope regimes.
 - Because it evaluates only the final candidate window, upstream candidate quality still affects downstream performance.
-- This checkpoint was validated on independent cells, but the manuscript does not report a separate final held-out test set beyond the reported validation comparison.
+- This checkpoint was validated on independent cells, but the associated manuscript does not report a separate final held-out test set for this classifier.
 
 ### Example Usage
 
