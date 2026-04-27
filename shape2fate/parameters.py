@@ -63,11 +63,11 @@ class LinkingParameters:
     :ivar feature_cost_multiplier: Scaling factor for the feature difference component of the matching cost.
     :ivar maximum_distance: Maximum distance between detections to be considered for linking.
     :ivar maximum_skipped_frames: Maximum number of additional frames between detections to still be considered for linking.
-    :ivar minimum_length: Minimum length of a track to be retained after linking.
+    :ivar minimum_length: Minimum length (inclusive) of a track to be retained after linking.
     """
     birth_death_cost: float
     edge_removal_cost: float
     feature_cost_multiplier: float
     maximum_distance: float
     maximum_skipped_frames: int = 1
-    minimum_length: int = 5
+    minimum_length: int = 6
