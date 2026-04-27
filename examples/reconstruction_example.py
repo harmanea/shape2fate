@@ -1,5 +1,4 @@
 import os
-import ssl
 import zipfile
 from urllib.request import Request, urlopen
 from dataclasses import asdict
@@ -15,9 +14,7 @@ import shape2fate.otf
 import shape2fate.utils
 
 DATA_DIR = "./data"
-CERT_URL = "https://pki.cesnet.cz/_media/certs/chain-harica-rsa-ov-crosssigned-root.pem"
-CERT_PATH = os.path.join(DATA_DIR, "chain-harica-cross.pem")
-DATA_URL = "https://shape2fate.utia.cas.cz/files/endocytosis/github_shape2fate1.0_107.zip"
+DATA_URL = "https://zenodo.org/api/records/17484958/files/CME%20tracking%20testing.zip/content"
 ZIP_PATH = os.path.join(DATA_DIR, "test_data.zip")
 
 def download_file(url, dest_path, context=None):
@@ -38,13 +35,8 @@ if __name__ == "__main__":
     os.makedirs(DATA_DIR, exist_ok=True)
     print(f"Data directory: {os.path.abspath(DATA_DIR)}")
 
-    print("Downloading SSL certificate ... ", end="", flush=True)
-    download_file(CERT_URL, CERT_PATH)
-    print("DONE")
-
     print("Downloading test data ... ", end="", flush=True)
-    context = ssl.create_default_context(cafile=CERT_PATH)
-    download_file(DATA_URL, ZIP_PATH, context)
+    download_file(DATA_URL, ZIP_PATH)
     print("DONE")
 
     print("Unzipping test data ... ", end="", flush=True)
@@ -53,16 +45,19 @@ if __name__ == "__main__":
     os.remove(ZIP_PATH)
     print("DONE")
 
-    image_path = os.path.join(DATA_DIR, "data", "Oxford", "20240703", "SHSY5Y_RUSHLAMP_CLCSNAP_107_subset.dv")
+    image_path = os.path.join(DATA_DIR, "CME tracking testing", "RPE1_egfpCLCa_012.nd2")
     print(f"Opening raw example movie: {image_path} ... ", end="", flush=True)
     images = s2f.utils.open_image_file(image_path).astype(np.float64)
+    images = images.reshape(-1, 3, 512, 3, 512).transpose(0, 1, 3, 2, 4).reshape(-1, 512, 512)
     print("DONE")
+    print(f"   ↳ Shape: {images.shape}")
 
     ap = s2f.parameters.AcquisitionParameters(
         image_size=512,
-        na=1.5,
-        pixel_size=0.0791,
-        wavelength=603
+        na=1.49,
+        pixel_size=0.064395,
+        wavelength=526,
+        frame_rate=1 / 0.194
     )
     print(f"\nAcquisition parameters:")
     for key, value in asdict(ap).items():

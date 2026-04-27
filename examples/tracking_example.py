@@ -1,6 +1,5 @@
 import os
 import sys
-import ssl
 import zipfile
 from urllib.request import Request, urlopen
 from dataclasses import asdict
@@ -19,9 +18,8 @@ import shape2fate.parameters
 import shape2fate.utils
 
 DATA_DIR = "./data"
-CERT_URL = "https://pki.cesnet.cz/_media/certs/chain-harica-rsa-ov-crosssigned-root.pem"
-CERT_PATH = os.path.join(DATA_DIR, "chain-harica-cross.pem")
-DATA_URL = "https://shape2fate.utia.cas.cz/files/test_data/test_data.zip"
+MODEL_ZOO_DIR = "./model_zoo"
+DATA_URL = "https://zenodo.org/api/records/17484958/files/CME%20tracking%20validation.zip/content"
 ZIP_PATH = os.path.join(DATA_DIR, "test_data.zip")
 
 MATCHING_THRESHOLD = 5
@@ -45,13 +43,8 @@ if __name__ == "__main__":
     os.makedirs(DATA_DIR, exist_ok=True)
     print(f"Data directory: {os.path.abspath(DATA_DIR)}")
 
-    print("Downloading SSL certificate ... ", end="", flush=True)
-    download_file(CERT_URL, CERT_PATH)
-    print("DONE")
-
     print("Downloading test data ... ", end="", flush=True)
-    context = ssl.create_default_context(cafile=CERT_PATH)
-    download_file(DATA_URL, ZIP_PATH, context)
+    download_file(DATA_URL, ZIP_PATH)
     print("DONE")
 
     print("Unzipping test data ... ", end="", flush=True)
@@ -60,7 +53,7 @@ if __name__ == "__main__":
     os.remove(ZIP_PATH)
     print("DONE")
 
-    image_path = os.path.join(DATA_DIR, "TIRF488_cam1_1_L.mrc")
+    image_path = os.path.join(DATA_DIR, "CME tracking validation", "RPE1_egfpCLCa_033-recon.mrc")
     print(f"Opening example movie: {image_path} ... ", end="", flush=True)
     images = s2f.utils.open_image_file(image_path)
     print("DONE")
@@ -72,7 +65,7 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    checkpoint_path = os.path.join(DATA_DIR, "ccp-detector-sandy-wildflower-269.pt")
+    checkpoint_path = os.path.join(MODEL_ZOO_DIR, "ccp-detector-sandy-wildflower-269.pt")
     print(f"Loading model weights from: {checkpoint_path} ... ", end="", flush=True)
     checkpoint = torch.load(checkpoint_path, map_location=device)
     model.load_state_dict(checkpoint)
@@ -160,7 +153,7 @@ if __name__ == "__main__":
     print("\nSetting up tracking evaluation ... ", end="", flush=True)
     gts = []
     for i in range(3):
-        gt_path = os.path.join(DATA_DIR, f"annotations_{i + 1}.csv")
+        gt_path = os.path.join(DATA_DIR, "CME tracking validation", f"RPE1_egfpCLCa_033-annotations_{i + 1}.csv")
         gt = pd.read_csv(gt_path)
         gt = gt.rename(columns={"track_id": "particle"})
         gt = gt.groupby("particle").filter(lambda t: (512 < t.y.mean() < 768) and (256 < t.x.mean() < 512))
