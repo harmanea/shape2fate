@@ -1,7 +1,6 @@
 import os
 import sys
 import zipfile
-from urllib.request import Request, urlopen
 from dataclasses import asdict
 
 import torch
@@ -24,27 +23,14 @@ ZIP_PATH = os.path.join(DATA_DIR, "test_data.zip")
 
 MATCHING_THRESHOLD = 5
 
-
-def download_file(url, dest_path, context=None):
-    with urlopen(Request(url), timeout=10, context=context) as resp, open(dest_path, "wb") as f:
-        if resp.status != 200:
-            raise RuntimeError(f"HTTP error: {resp.status}")
-
-        while True:
-            chunk = resp.read(8192)
-            if not chunk:
-                break
-            f.write(chunk)
-
-
 if __name__ == "__main__":
     print("\nRunning shape2fate tracking example script ...\n")
 
     os.makedirs(DATA_DIR, exist_ok=True)
     print(f"Data directory: {os.path.abspath(DATA_DIR)}")
 
-    print("Downloading test data ... ", end="", flush=True)
-    download_file(DATA_URL, ZIP_PATH)
+    print("Downloading test data ... ")
+    s2f.utils.download_file(DATA_URL, ZIP_PATH)
     print("DONE")
 
     print("Unzipping test data ... ", end="", flush=True)

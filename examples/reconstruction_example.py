@@ -1,6 +1,5 @@
 import os
 import zipfile
-from urllib.request import Request, urlopen
 from dataclasses import asdict
 
 import torch
@@ -17,17 +16,6 @@ DATA_DIR = "./data"
 DATA_URL = "https://zenodo.org/api/records/17484958/files/CME%20tracking%20testing.zip/content"
 ZIP_PATH = os.path.join(DATA_DIR, "test_data.zip")
 
-def download_file(url, dest_path, context=None):
-    with urlopen(Request(url), timeout=10, context=context) as resp, open(dest_path, "wb") as f:
-        if resp.status != 200:
-            raise RuntimeError(f"HTTP error: {resp.status}")
-
-        while True:
-            chunk = resp.read(8192)
-            if not chunk:
-                break
-            f.write(chunk)
-
 
 if __name__ == "__main__":
     print("\nRunning shape2fate reconstruction example script ...\n")
@@ -35,8 +23,8 @@ if __name__ == "__main__":
     os.makedirs(DATA_DIR, exist_ok=True)
     print(f"Data directory: {os.path.abspath(DATA_DIR)}")
 
-    print("Downloading test data ... ", end="", flush=True)
-    download_file(DATA_URL, ZIP_PATH)
+    print("Downloading test data ... ")
+    s2f.utils.download_file(DATA_URL, ZIP_PATH)
     print("DONE")
 
     print("Unzipping test data ... ", end="", flush=True)

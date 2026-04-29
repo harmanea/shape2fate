@@ -1,7 +1,9 @@
 import os
 import warnings
 import importlib
+from urllib.request import Request, urlopen
 
+import tqdm
 import numpy as np
 
 
@@ -76,3 +78,23 @@ def save_tiff_file(images: np.ndarray, name: str):
     else:
         pil_images = [Image.fromarray(img) for img in images]
         pil_images[0].save(name, format="TIFF", save_all=True, append_images=pil_images[1:])
+
+
+def download_file(url, dest_path, context=None, chunk_size = 8192):
+    with urlopen(Request(url), timeout=10, context=context) as resp, open(dest_path, "wb") as f:
+        if resp.status != 200:
+            raise RuntimeError(f"HTTP error: {resp.status}")
+
+        total = resp.getheader("Content-Length")
+        total = int(total) if total is not None else None
+
+        with tqdm.tqdm(
+                total=total,
+                unit="B",
+                unit_scale=True,
+                unit_divisor=1024,
+                desc=os.path.basename(dest_path)
+        ) as pbar:
+            for chunk in iter(lambda: resp.read(chunk_size), b""):
+                f.write(chunk)
+                pbar.update(len(chunk))
