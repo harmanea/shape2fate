@@ -15,7 +15,6 @@ import shape2fate.metrics
 import shape2fate.models
 import shape2fate.synthetic_data
 
-
 MODEL_ZOO_DIR = "./model_zoo"
 
 MATCHING_THRESHOLD = 5
@@ -59,7 +58,7 @@ if __name__ == "__main__":
     learning_rate = batch_size * 1e-5
     optimizer_weight_decay = 0.05
     dataloader_num_workers = 4
-    
+
     training_parameters = {
         "batch_size": batch_size,
         "cycles": cycles,
