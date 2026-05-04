@@ -614,7 +614,7 @@ class UntanglingGraph:
                 t.successors = successor.successors
 
         # Generate result
-        particles, x_coords, y_coords, classes, frames = [], [], [], [], []
+        indices, x_coords, y_coords, classes, frames = [], [], [], [], []
 
         for t in self.tracklets:
             if t in tracklets_to_remove:
@@ -624,15 +624,15 @@ class UntanglingGraph:
                 d = detections.iloc[detection]
                 x_coords.append(np.mean(d.x))
                 y_coords.append(np.mean(d.y))
-                classes.append(np.mean(d.cls))
+                classes.append(np.mean(d.si))
                 frames.append(f)
-                particles.append(t.index)
+                indices.append(t.index)
 
         data = {
-            'particle': np.array(particles),
+            'track_id': np.array(indices),
             'x': np.array(x_coords),
             'y': np.array(y_coords),
-            'cls': np.array(classes),
+            'si': np.array(classes),
             'frame': np.array(frames)
         }
 

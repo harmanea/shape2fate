@@ -83,11 +83,11 @@ if __name__ == "__main__":
         b_xy = np.array(b[["x", "y"]])
         euclidean_dist = spatial.distance.cdist(a_xy, b_xy, metric="euclidean")
 
-        a_cls = np.array(a["cls"])
-        b_cls = np.array(b["cls"])
-        cls_dist = np.square(a_cls[:, None] - b_cls[None, :])
+        a_si = np.array(a["si"])
+        b_si = np.array(b["si"])
+        si_dist = np.square(a_si[:, None] - b_si[None, :])
 
-        return euclidean_dist + lp.feature_cost_multiplier * cls_dist
+        return euclidean_dist + lp.feature_cost_multiplier * si_dist
 
     print("\nSetting up MIP linking problem ... ", end="", flush=True)
     linking_graph = s2f.linking.LinkingGraph(detections, distance_function, lp.maximum_distance, lp.birth_death_cost)
@@ -127,9 +127,9 @@ if __name__ == "__main__":
     print("DONE")
 
     print("Filtering trajectories ... ", end="", flush=True)
-    filtered_trajectories = trajectories.groupby("particle").filter(lambda t: t.frame.count() >= lp.minimum_length)
+    filtered_trajectories = trajectories.groupby("track_id").filter(lambda t: t.frame.count() >= lp.minimum_length)
     print("DONE")
-    print(f"   ↳ {trajectories['particle'].nunique()} trajectories filtered to {filtered_trajectories['particle'].nunique()}")
+    print(f"   ↳ {trajectories['track_id'].nunique()} trajectories filtered to {filtered_trajectories['track_id'].nunique()}")
 
     trajectories_path = os.path.join(DATA_DIR, "trajectories.csv")
     print(f"Saving trajectories to: {trajectories_path} ... ", end="", flush=True)
@@ -141,11 +141,10 @@ if __name__ == "__main__":
     for i in range(3):
         gt_path = os.path.join(DATA_DIR, "CME tracking validation", f"RPE1_egfpCLCa_033-annotations_{i + 1}.csv")
         gt = pd.read_csv(gt_path)
-        gt = gt.rename(columns={"track_id": "particle"})
-        gt = gt.groupby("particle").filter(lambda t: (512 < t.y.mean() < 768) and (256 < t.x.mean() < 512))
+        gt = gt.groupby("track_id").filter(lambda t: (512 < t.y.mean() < 768) and (256 < t.x.mean() < 512))
         gts.append(gt)
 
-    eval_trajectories = filtered_trajectories.groupby("particle").filter(lambda t: (512 < t.y.mean() < 768) and (256 < t.x.mean() < 512))
+    eval_trajectories = filtered_trajectories.groupby("track_id").filter(lambda t: (512 < t.y.mean() < 768) and (256 < t.x.mean() < 512))
     print("DONE")
 
     print("Computing MOTA and MOTP ... ", end="", flush=True)

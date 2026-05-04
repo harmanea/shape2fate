@@ -3,7 +3,6 @@ import pandas as pd
 import cv2 as cv
 import torch
 
-from scipy import spatial
 from skimage import feature
 
 
@@ -18,22 +17,22 @@ def generate_exo_detections(model: torch.nn.Module, device: torch.device, images
             torch_image = torch.from_numpy(normalize_img(img)).to(device, torch.float32).expand(1, 1, -1, -1)
             predictions = torch.sigmoid(model(torch_image)).squeeze().cpu().numpy()
 
-        for cls, cls_predictions in enumerate(predictions):
-            n_labels, labels = cv.connectedComponents((cls_predictions > 0.1).astype(np.uint8))
+        for si, si_predictions in enumerate(predictions):
+            n_labels, labels = cv.connectedComponents((si_predictions > 0.1).astype(np.uint8))
 
             for l in range(1, n_labels):
                 mask = labels == l
 
-                if np.any(cls_predictions[mask] > 0.4 + 0.1 * cls):
+                if np.any(si_predictions[mask] > 0.4 + 0.1 * si):
                     frames.append(f)
                     y_coords.append(yy[mask].mean())
                     x_coords.append(xx[mask].mean())
-                    classes.append(cls)
+                    classes.append(si)
 
     data = {
         'x': np.array(x_coords),
         'y': np.array(y_coords),
-        'cls': np.array(classes),
+        'si': np.array(classes),
         'frame': np.array(frames)
     }
 
@@ -63,21 +62,21 @@ def generate_ccp_detections(model: torch.nn.Module, device: torch.device, images
     data = {
         'x': np.concatenate(x_coords),
         'y': np.concatenate(y_coords),
-        'cls': np.concatenate(classes),
+        'si': np.concatenate(classes),
         'frame': np.concatenate(frames)
     }
 
     return pd.DataFrame(data)
 
 
-def _merge_adjacent_peaks(peaks: np.ndarray, classes: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def _merge_adjacent_peaks(peaks: np.ndarray, values: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     Find clusters of detections whose integer coordinates are directly next to each other.
     Multiple such cases are collapsed into a single cluster.
     """
 
     if len(peaks) == 0:
-        return peaks.astype(np.float64), classes
+        return peaks.astype(np.float64), values
 
     ys = peaks[:, 0].astype(int)
     xs = peaks[:, 1].astype(int)
@@ -103,7 +102,7 @@ def _merge_adjacent_peaks(peaks: np.ndarray, classes: np.ndarray) -> tuple[np.nd
         clusters.setdefault(int(lab), []).append(idx)
 
     merged_coords = []
-    merged_classes = []
+    merged_values = []
     clustered_mask = np.zeros(len(peaks), dtype=bool)
 
     for l, inds in clusters.items():
@@ -111,19 +110,19 @@ def _merge_adjacent_peaks(peaks: np.ndarray, classes: np.ndarray) -> tuple[np.nd
             continue
         inds_arr = np.asarray(inds, dtype=int)
         merged_coords.append(peaks[inds_arr].mean(axis=0))
-        merged_classes.append(classes[inds_arr[0]])
+        merged_values.append(values[inds_arr[0]])
         clustered_mask[inds_arr] = True
 
     if merged_coords:
         merged_coords = np.vstack(merged_coords)
-        merged_classes = np.asarray(merged_classes)
+        merged_values = np.asarray(merged_values)
         out_coords = np.concatenate([merged_coords, peaks[~clustered_mask]], axis=0)
-        out_classes = np.concatenate([merged_classes, classes[~clustered_mask]], axis=0)
+        out_values = np.concatenate([merged_values, values[~clustered_mask]], axis=0)
     else:
         out_coords = peaks
-        out_classes = classes
+        out_values = values
 
-    return out_coords.astype(np.float64), out_classes
+    return out_coords.astype(np.float64), out_values
 
 
 def normalize_img(img: np.ndarray) -> np.ndarray:
