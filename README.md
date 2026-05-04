@@ -157,6 +157,9 @@ We recommend first testing your data in these notebooks to verify compatibility 
 For local execution, you can follow the example scripts in `examples/`.
 These scripts serve as minimal templates and can be directly adapted to your own datasets by modifying the input paths and parameters.
 
+If you encounter issues when adapting the pipeline to your own data, see the
+[Troubleshooting Guide](TROUBLESHOOTING.md).
+
 ## Repository tour
 - `shape2fate/` — core package implementing SIM reconstruction, detection, tracking, metrics, and synthetic-data utilities.
   - `otf.py` — optical transfer function builders and utilities for reconstruction.
