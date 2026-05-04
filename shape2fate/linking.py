@@ -644,8 +644,13 @@ def print_solver_status(status, solver):
         case solver.OPTIMAL:
             print(f'Optimal solution with objective value {solver.Objective().Value():.2f}'
                   f' found in {solver.wall_time() / 1000:.1f}s and {solver.iterations()} iterations')
-        case solver.FEASIBLE: print('Problem is feasible, or stopped by time limit')
-        case solver.INFEASIBLE: print('Problem is infeasible')
-        case solver.UNBOUNDED: print('Problem is unbounded')
-        case solver.ABNORMAL: print('Error of some kind')
-        case _: print(f'Unknown status {status}')
+        case solver.FEASIBLE:
+            print('Problem is feasible, or stopped by time limit')
+        case solver.INFEASIBLE:
+            print('Problem is infeasible')
+        case solver.UNBOUNDED:
+            print('Problem is unbounded')
+        case solver.ABNORMAL:
+            print('Error of some kind')
+        case _:
+            print(f'Unknown status {status}')

@@ -9,7 +9,6 @@ from .sim import component_separation_matrix, diffraction_limit
 from .otf import OTF
 from .reconstruction import component_padding_matrices, fourier_shift_matrix
 
-
 _XX = np.linspace(0, 2 * np.pi, 6, False)
 _SEPARATION_MATRICES = np.stack([component_separation_matrix(phase_offset) for phase_offset in _XX])
 
@@ -33,7 +32,7 @@ def check_parameter_estimates(shifts, modulations, rad_rel_tol=0.001, ang_tol_de
             errors.append(f'  - Orientation {i + 1}: {r:.1f}{" <-- outlier" if i == outlier_index else ""}')
 
     # Check angles
-    angles = np.arctan2(shifts[:,0], shifts[:,1])
+    angles = np.arctan2(shifts[:, 0], shifts[:, 1])
     angles = [a + np.pi if a < 0 else a for a in angles]
 
     seps = np.array([np.abs(angles[1] - angles[2]), np.abs(angles[0] - angles[2]), np.abs(angles[0] - angles[1])])
@@ -67,7 +66,6 @@ def check_parameter_estimates(shifts, modulations, rad_rel_tol=0.001, ang_tol_de
 
 def estimate_parameters(images: np.ndarray, otf: OTF, ap: AcquisitionParameters, rp: ReconstructionParameters,
                         approximate_shifts = None, epsilon: float = 10_000) -> tuple:
-
     if rp.rl_deconvolution_iterations > 0:
         images = _deconvolve_richardson_lucy(images, rp.rl_deconvolution_iterations, otf)
 

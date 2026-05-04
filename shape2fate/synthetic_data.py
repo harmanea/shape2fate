@@ -11,9 +11,9 @@ from .parameters import AcquisitionParameters, ReconstructionParameters
 class SyntheticDataset(IterableDataset):
     def __init__(self, contrast_fg_range: tuple[float,float] = (0.0, 1.0), contrast_bg_range: tuple[float,float] = (0.0, 1.0)):
         self.patch_size = 128
-        
+
         self.contrast_fg_range = contrast_fg_range
-        self.contrast_bg_range = contrast_bg_range        
+        self.contrast_bg_range = contrast_bg_range
 
         self.frequency = 0.17
         self.amplitude = 1.0
@@ -62,9 +62,9 @@ class SyntheticDataset(IterableDataset):
 
 
 class SyntheticCCPDataset(SyntheticDataset):
-    def __init__(self,min_n: int = 5, max_n: int = 15, radius: float = 2.5,
-        contrast_fg_range: tuple[float,float] = (0.0, 1.0),
-        contrast_bg_range: tuple[float,float] = (0.0, 1.0)):
+    def __init__(self, min_n: int = 5, max_n: int = 15, radius: float = 2.5,
+                 contrast_fg_range: tuple[float, float] = (0.0, 1.0),
+                 contrast_bg_range: tuple[float, float] = (0.0, 1.0)):
         super().__init__(
             contrast_fg_range=contrast_fg_range,
             contrast_bg_range=contrast_bg_range
@@ -80,7 +80,7 @@ class SyntheticCCPDataset(SyntheticDataset):
         if not (0 <= min_n < max_n <= 49):
             raise ValueError("Require 0 ? min_n < max_n ? 49")
         self.min_n, self.max_n = min_n, max_n
-            
+
         self.max_offset = 8
         assert self.max_offset < 16
 
@@ -126,7 +126,7 @@ class SyntheticCCPDataset(SyntheticDataset):
         y = np.minimum(np.sum(distances, -1), 1)
 
         # Generate simulated SIM image
-        x,_,_ = super()._simulate_sim(full_images.transpose((2, 0, 1)))
+        x, _, _ = super()._simulate_sim(full_images.transpose((2, 0, 1)))
 
         return x, y
 
@@ -267,7 +267,7 @@ class SyntheticExocytosisDataset(SyntheticDataset):
         else:
             y1 = np.zeros((self.patch_size, self.patch_size))
 
-        x,_,_ = self._simulate_sim(images)
+        x, _, _ = self._simulate_sim(images)
         y = np.stack([y0, y1])
 
         return x, y

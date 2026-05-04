@@ -80,7 +80,7 @@ def save_tiff_file(images: np.ndarray, name: str):
         pil_images[0].save(name, format="TIFF", save_all=True, append_images=pil_images[1:])
 
 
-def download_file(url, dest_path, context=None, chunk_size = 8192):
+def download_file(url, dest_path, context=None, chunk_size: int = 8192):
     with urlopen(Request(url), timeout=10, context=context) as resp, open(dest_path, "wb") as f:
         if resp.status != 200:
             raise RuntimeError(f"HTTP error: {resp.status}")
