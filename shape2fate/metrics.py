@@ -2,22 +2,22 @@ import itertools
 
 import numpy as np
 import pandas as pd
-
 from scipy import spatial, optimize
 
 
 def temporal_intersection_over_union(a: pd.DataFrame, b: pd.DataFrame, threshold: float) -> float:
-    """
-    Temporal intersection over union of two tracks.
-    Perfect match will return 1, complete misalignment will return 0.
-    If the two tracks don't overlap spatially in any frame, -infinity is returned.
-    Both tracks must be a Pandas DataFrame with 'x', 'y', and ordered 'frame' columns.
-    Track input order is irrelevant.
+    """Compute temporal intersection over union of two tracks.
 
-    :param a: the first track
-    :param b: the second track
-    :param threshold: the maximum Euclidean distance between two detections for them to be considered as overlapping
-    :return: the metric value
+    Perfect match returns ``1`` and complete misalignment returns ``0``. If the tracks do not overlap spatially in any
+    frame, ``-inf`` is returned. Track input order is irrelevant.
+
+    Args:
+        a: First track with ``x``, ``y``, and ordered ``frame`` columns.
+        b: Second track with ``x``, ``y``, and ordered ``frame`` columns.
+        threshold: Maximum Euclidean distance between detections for them to be considered overlapping.
+
+    Returns:
+        Temporal intersection-over-union metric value.
     """
     ab, a_ind, b_ind = np.intersect1d(a.frame, b.frame, assume_unique=True, return_indices=True)
     distances = np.hypot(a.x.values[a_ind] - b.x.values[b_ind], a.y.values[a_ind] - b.y.values[b_ind])
@@ -35,6 +35,17 @@ _columns = ['x', 'y', 'frame', 'track_id']
 
 
 def mean_temporal_intersection_over_union(a: pd.DataFrame, b: pd.DataFrame, threshold: float) -> dict[str, float]:
+    """Compute mean temporal intersection over union between two track sets.
+
+    Args:
+        a: First track set with ``x``, ``y``, ``frame``, and ``track_id`` columns.
+        b: Second track set with ``x``, ``y``, ``frame``, and ``track_id`` columns.
+        threshold: Maximum Euclidean distance between detections for them to be considered overlapping.
+
+    Returns:
+        Dictionary containing the mean TIOU, matched-track mean TIOU, false-positive track count, and false-negative
+        track count.
+    """
     grouped_a = [pd.DataFrame.from_records(g, columns=_columns)
                  for _, g in itertools.groupby(a[_columns].values, lambda row: row[3])]
     grouped_b = [pd.DataFrame.from_records(g, columns=_columns)
@@ -69,6 +80,16 @@ mtiou = mean_temporal_intersection_over_union
 
 
 def mot_metrics(a: pd.DataFrame, b: pd.DataFrame, threshold: float) -> dict[str, float]:
+    """Compute CLEAR MOT tracking metrics.
+
+    Args:
+        a: Ground-truth detections with ``x``, ``y``, ``frame``, and ``track_id`` columns.
+        b: Tracker detections with ``x``, ``y``, ``frame``, and ``track_id`` columns.
+        threshold: Maximum distance for matching detections.
+
+    Returns:
+        Dictionary containing MOTA, MOTP, true positives, false negatives, false positives, and identity switches.
+    """
     TP, FP, FN, IDS = 0, 0, 0, 0
     GT = len(a)
     d, c = 0, 0
@@ -114,7 +135,19 @@ def mot_metrics(a: pd.DataFrame, b: pd.DataFrame, threshold: float) -> dict[str,
 
 
 def hota(gt: pd.DataFrame, tr: pd.DataFrame, threshold: float) -> dict[str, float]:
-    """Slightly adapted from https://github.com/JonathonLuiten/TrackEval"""
+    """Compute HOTA tracking metrics.
+
+    Slightly adapted from https://github.com/JonathonLuiten/TrackEval.
+
+    Args:
+        gt: Ground-truth detections.
+        tr: Tracker detections.
+        threshold: Maximum distance for matching detections.
+
+    Returns:
+        Dictionary containing HOTA, association, detection, localization, true-positive, false-negative, and
+        false-positive metrics.
+    """
 
     # Ensure track ids are sorted from 0 to max(n)
     gt = gt.copy()
@@ -200,7 +233,16 @@ def hota(gt: pd.DataFrame, tr: pd.DataFrame, threshold: float) -> dict[str, floa
             'HOTA TP': HOTA_TP, 'HOTA FN': HOTA_FN, 'HOTA FP': HOTA_FP}
 
 
-def linear_assignment(cost_matrix, max_cost):
+def linear_assignment(cost_matrix: np.ndarray, max_cost: float) -> tuple[np.ndarray, np.ndarray]:
+    """Solve a linear assignment problem with dummy unmatched assignments.
+
+    Args:
+        cost_matrix: Pairwise assignment cost matrix.
+        max_cost: Cost assigned to leaving an item unmatched.
+
+    Returns:
+        Row and column assignment indices for the augmented assignment problem.
+    """
     height, width = cost_matrix.shape
 
     top_right = np.full((height, height), np.inf)

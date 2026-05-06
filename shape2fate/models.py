@@ -4,7 +4,7 @@ from torch import nn
 
 
 class ConvLayer(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int):
+    def __init__(self, in_channels: int, out_channels: int) -> None:
         super().__init__()
 
         self.layer = nn.Sequential(
@@ -16,12 +16,12 @@ class ConvLayer(nn.Module):
             nn.ReLU(inplace=True),
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.layer(x)
 
 
 class DownSamplingLayer(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int):
+    def __init__(self, in_channels: int, out_channels: int) -> None:
         super().__init__()
 
         self.layer = nn.Sequential(
@@ -29,14 +29,16 @@ class DownSamplingLayer(nn.Module):
             ConvLayer(in_channels, out_channels)
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.layer(x)
 
 
 class UpSamplingLayer(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, mode: str = 'transposed'):
+    def __init__(self, in_channels: int, out_channels: int, mode: str = 'transposed') -> None:
         """
-        :param mode: 'transposed' for transposed convolution, or 'nearest', 'linear', 'bilinear', 'bicubic', 'trilinear'
+        Args:
+            mode: Upsampling mode. Use ``'transposed'`` for transposed convolution, or ``'nearest'``, ``'linear'``,
+                ``'bilinear'``, ``'bicubic'``, or ``'trilinear'`` for interpolation.
         """
         super().__init__()
 
@@ -48,11 +50,12 @@ class UpSamplingLayer(nn.Module):
                 nn.Conv2d(in_channels, in_channels // 2, kernel_size=1)
             )
         else:
-            raise ValueError(f'Unsupported mode [{mode}], supported modes are "transposed", "nearest", "linear", "bilinear", "bicubic" or "trilinear"')
+            supported_modes = '"transposed", "nearest", "linear", "bilinear", "bicubic" or "trilinear"'
+            raise ValueError(f'Unsupported mode [{mode}], supported modes are {supported_modes}')
 
         self.conv = ConvLayer(in_channels, out_channels)
 
-    def forward(self, x1, x2):
+    def forward(self, x1: torch.Tensor, x2: torch.Tensor) -> torch.Tensor:
         x1 = self.up(x1)
         x = torch.cat([x2, x1], dim=1)
 
@@ -60,7 +63,16 @@ class UpSamplingLayer(nn.Module):
 
 
 class UNet(nn.Module):
-    def __init__(self, in_channels: int = 1, out_channels: int = 1, depth: int = 3, start_filters: int = 16, up_mode: str = 'transposed'):
+    """U-Net architecture used for dense detection maps."""
+
+    def __init__(
+            self,
+            in_channels: int = 1,
+            out_channels: int = 1,
+            depth: int = 3,
+            start_filters: int = 16,
+            up_mode: str = 'transposed'
+    ) -> None:
         super().__init__()
 
         self.inc = ConvLayer(in_channels, start_filters)
@@ -75,7 +87,7 @@ class UNet(nn.Module):
 
         self.outc = nn.Conv2d(start_filters, out_channels, kernel_size=1)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.inc(x)
 
         outputs = []
@@ -91,7 +103,7 @@ class UNet(nn.Module):
 
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 5000):
+    def __init__(self, d_model: int, dropout: float = 0.1, max_len: int = 5000) -> None:
         super(PositionalEncoding, self).__init__()
 
         self.dropout = nn.Dropout(p=dropout)
@@ -103,13 +115,24 @@ class PositionalEncoding(nn.Module):
         pe[0, :, 1::2] = torch.cos(position * div_term)
         self.register_buffer('pe', pe)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x + self.pe[:, :x.size(1)]
         return self.dropout(x)
 
 
 class TransformerModel(nn.Module):
-    def __init__(self, cnn_filters, pe_dropout, pe_max_len, n_attention_heads, dim_feedforward, num_transformer_layers, fc_dropout):
+    """CNN-transformer classifier for image-sequence-level predictions."""
+
+    def __init__(
+            self,
+            cnn_filters: tuple[int, int],
+            pe_dropout: float,
+            pe_max_len: int,
+            n_attention_heads: int,
+            dim_feedforward: int,
+            num_transformer_layers: int,
+            fc_dropout: float
+    ) -> None:
         super(TransformerModel, self).__init__()
 
         self.cnn_filters = cnn_filters
@@ -147,7 +170,7 @@ class TransformerModel(nn.Module):
 
         self.fc = nn.Linear(cnn_filters[1], 1)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         b, s, h, w = x.shape
 
         x = x.reshape(b * s, 1, h, w)  # from (batch, seq, height, width) to (batch * seq, channels, height, width)

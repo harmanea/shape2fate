@@ -1,15 +1,28 @@
+import cv2 as cv
 import numpy as np
 import pandas as pd
-import cv2 as cv
 import torch
-
 from skimage import feature
 
 
 def generate_exo_detections(model: torch.nn.Module, device: torch.device, images: np.ndarray) -> pd.DataFrame:
+    """Generate exocytosis detections from reconstructed image frames.
+
+    Args:
+        model: Segmentation model that predicts one interior-distance map per exocytosis class.
+        device: Device used for model inference.
+        images: Image stack with shape ``(frames, height, width)``.
+
+    Returns:
+        DataFrame with ``x``, ``y``, ``si``, and ``frame`` columns.
+    """
     model.to(device).eval()
 
-    x_coords, y_coords, classes, frames = [], [], [], []
+    x_coords: list[float] = []
+    y_coords: list[float] = []
+    classes: list[int] = []
+    frames: list[int] = []
+
     yy, xx = np.mgrid[:images.shape[-2], :images.shape[-1]]
 
     for f, img in enumerate(images.copy()):
@@ -40,9 +53,22 @@ def generate_exo_detections(model: torch.nn.Module, device: torch.device, images
 
 
 def generate_ccp_detections(model: torch.nn.Module, device: torch.device, images: np.ndarray) -> pd.DataFrame:
+    """Generate clathrin-coated pit detections from reconstructed image frames.
+
+    Args:
+        model: Segmentation model that predicts CCP interior-distance maps.
+        device: Device used for model inference.
+        images: Image stack with shape ``(frames, height, width)``.
+
+    Returns:
+        DataFrame with ``x``, ``y``, ``si``, and ``frame`` columns.
+    """
     model.to(device).eval()
 
-    x_coords, y_coords, classes, frames = [], [], [], []
+    x_coords: list[np.ndarray] = []
+    y_coords: list[np.ndarray] = []
+    classes: list[np.ndarray] = []
+    frames: list[np.ndarray] = []
 
     for f, img in enumerate(images.copy()):
         with torch.no_grad():
@@ -70,9 +96,17 @@ def generate_ccp_detections(model: torch.nn.Module, device: torch.device, images
 
 
 def _merge_adjacent_peaks(peaks: np.ndarray, values: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """
-    Find clusters of detections whose integer coordinates are directly next to each other.
-    Multiple such cases are collapsed into a single cluster.
+    """Merge directly adjacent peak detections.
+
+    Clusters detections whose integer coordinates are directly next to each other and collapses each cluster into one
+    detection.
+
+    Args:
+        peaks: Peak coordinates as ``(row, column)`` pairs.
+        values: Peak values corresponding to ``peaks``.
+
+    Returns:
+        A tuple of merged peak coordinates and their values.
     """
 
     if len(peaks) == 0:
@@ -101,8 +135,8 @@ def _merge_adjacent_peaks(peaks: np.ndarray, values: np.ndarray) -> tuple[np.nda
     for idx, lab in enumerate(det_labels):
         clusters.setdefault(int(lab), []).append(idx)
 
-    merged_coords = []
-    merged_values = []
+    merged_coords: list[np.ndarray] = []
+    merged_values: list[float] = []
     clustered_mask = np.zeros(len(peaks), dtype=bool)
 
     for l, inds in clusters.items():
@@ -114,10 +148,10 @@ def _merge_adjacent_peaks(peaks: np.ndarray, values: np.ndarray) -> tuple[np.nda
         clustered_mask[inds_arr] = True
 
     if merged_coords:
-        merged_coords = np.vstack(merged_coords)
-        merged_values = np.asarray(merged_values)
-        out_coords = np.concatenate([merged_coords, peaks[~clustered_mask]], axis=0)
-        out_values = np.concatenate([merged_values, values[~clustered_mask]], axis=0)
+        merged_coords_arr = np.vstack(merged_coords)
+        merged_values_arr = np.asarray(merged_values)
+        out_coords = np.concatenate([merged_coords_arr, peaks[~clustered_mask]], axis=0)
+        out_values = np.concatenate([merged_values_arr, values[~clustered_mask]], axis=0)
     else:
         out_coords = peaks
         out_values = values
@@ -126,4 +160,5 @@ def _merge_adjacent_peaks(peaks: np.ndarray, values: np.ndarray) -> tuple[np.nda
 
 
 def normalize_img(img: np.ndarray) -> np.ndarray:
+    """Normalize an image to zero mean and unit standard deviation."""
     return (img - np.mean(img)) / np.std(img)

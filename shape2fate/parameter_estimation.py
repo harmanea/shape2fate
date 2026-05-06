@@ -4,16 +4,36 @@ import numpy as np
 from numpy.fft import fft2, ifft2
 from scipy import optimize
 
-from .parameters import ReconstructionParameters, AcquisitionParameters
-from .sim import component_separation_matrix, diffraction_limit
 from .otf import OTF
+from .parameters import ReconstructionParameters, AcquisitionParameters
 from .reconstruction import component_padding_matrices, fourier_shift_matrix
+from .sim import component_separation_matrix, diffraction_limit
+from .types import Amplitudes, PhaseOffsets, ShiftLike, Shifts
 
 _XX = np.linspace(0, 2 * np.pi, 6, False)
 _SEPARATION_MATRICES = np.stack([component_separation_matrix(phase_offset) for phase_offset in _XX])
 
 
-def check_parameter_estimates(shifts, modulations, rad_rel_tol=0.001, ang_tol_deg=10, mod_tol=0.25, min_mod=0.1, eps=1e-12):
+def check_parameter_estimates(
+        shifts: Shifts,
+        modulations: Amplitudes,
+        rad_rel_tol: float = 0.001,
+        ang_tol_deg: float = 10,
+        mod_tol: float = 0.25,
+        min_mod: float = 0.1,
+        eps: float = 1e-12
+) -> None:
+    """Warn if estimated SIM illumination parameters look inconsistent.
+
+    Args:
+        shifts: Estimated frequency shifts for the SIM orientations.
+        modulations: Estimated modulation amplitudes for the SIM orientations.
+        rad_rel_tol: Relative tolerance for frequency-radius consistency.
+        ang_tol_deg: Angular tolerance, in degrees, for orientation spacing.
+        mod_tol: Absolute tolerance for modulation-amplitude consistency.
+        min_mod: Minimum acceptable modulation amplitude.
+        eps: Stabilizer for relative-radius calculations.
+    """
     errors = []
 
     shifts = np.asarray(shifts)
@@ -37,14 +57,18 @@ def check_parameter_estimates(shifts, modulations, rad_rel_tol=0.001, ang_tol_de
 
     seps = np.array([np.abs(angles[1] - angles[2]), np.abs(angles[0] - angles[2]), np.abs(angles[0] - angles[1])])
     ang_tol = np.deg2rad(ang_tol_deg)
-    failing = [k for k in range(3) if (np.abs(seps[k] - np.pi / 3)  > ang_tol) and (np.abs(seps[k] - 2 * np.pi / 3)  > ang_tol)]
+    failing = [
+        k for k in range(3)
+        if (np.abs(seps[k] - np.pi / 3) > ang_tol) and (np.abs(seps[k] - 2 * np.pi / 3) > ang_tol)
+    ]
 
     if failing:
         errors.append('Estimated illumination angles are not consistently spaced:')
 
         outlier_index = [i for i in range(3) if i not in failing][0] if len(failing) == 2 else None
         for i, a in enumerate(angles):
-            errors.append(f'  - Orientation {i + 1}: {np.rad2deg(a):.1f}°{" <-- outlier" if i == outlier_index else ""}')
+            suffix = " <-- outlier" if i == outlier_index else ""
+            errors.append(f'  - Orientation {i + 1}: {np.rad2deg(a):.1f}°{suffix}')
 
     # Check modulations
     m_med = np.median(modulations)
@@ -57,15 +81,41 @@ def check_parameter_estimates(shifts, modulations, rad_rel_tol=0.001, ang_tol_de
         for i, m in enumerate(modulations):
             is_outlier = i == outlier_index
             is_too_low = m < min_mod
-            errors.append(f'  - Orientation {i + 1}: {m:.2f}{" <-- " if is_outlier or is_too_low else ""}{"outlier" if is_outlier else ""}{", " if is_outlier and is_too_low else ""}{"too low" if is_too_low else ""}')
+            tags = []
+            if is_outlier:
+                tags.append("outlier")
+            if is_too_low:
+                tags.append("too low")
+
+            suffix = f' <-- {", ".join(tags)}' if tags else ""
+            errors.append(f'  - Orientation {i + 1}: {m:.2f}{suffix}')
 
     if errors:
         errors = ['SIM illumination may be misaligned or parameter estimation failed.'] + errors
         warnings.warn('\n'.join(errors))
 
 
-def estimate_parameters(images: np.ndarray, otf: OTF, ap: AcquisitionParameters, rp: ReconstructionParameters,
-                        approximate_shifts = None, epsilon: float = 10_000) -> tuple:
+def estimate_parameters(
+        images: np.ndarray,
+        otf: OTF,
+        ap: AcquisitionParameters,
+        rp: ReconstructionParameters,
+        approximate_shifts: Shifts | None = None,
+        epsilon: float = 10_000
+) -> tuple[Shifts, PhaseOffsets, Amplitudes]:
+    """Estimate SIM shifts, phase offsets, and modulation amplitudes.
+
+    Args:
+        images: Raw SIM image stack containing three phases for each of three orientations.
+        otf: Optical transfer function used during deconvolution and amplitude estimation.
+        ap: Acquisition parameters for the input images.
+        rp: Reconstruction parameters controlling preprocessing and peak search.
+        approximate_shifts: Optional approximate frequency shifts as ``(y, x)`` values.
+        epsilon: Stabilizer added to component magnitudes during shift estimation.
+
+    Returns:
+        Tuple of estimated shifts, phase offsets, and modulation amplitudes.
+    """
     if rp.rl_deconvolution_iterations > 0:
         images = _deconvolve_richardson_lucy(images, rp.rl_deconvolution_iterations, otf)
 
@@ -76,26 +126,46 @@ def estimate_parameters(images: np.ndarray, otf: OTF, ap: AcquisitionParameters,
 
     # This step may be skipped if we already have approximate shifts from a previous reconstruction
     if approximate_shifts is None:
-        minimum_distance = rp.minimum_peak_distance * diffraction_limit(ap.na, ap.wavelength, ap.pixel_size, ap.image_size)
-        approximate_shifts = [estimate_integer_shift(components[i][0], components[i][1], minimum_distance, epsilon)
-                              for i in range(3)]
+        minimum_distance = (
+            rp.minimum_peak_distance * diffraction_limit(ap.na, ap.wavelength, ap.pixel_size, ap.image_size)
+        )
+        approximate_shifts = tuple(
+            estimate_integer_shift(components[i][0], components[i][1], minimum_distance, epsilon)
+            for i in range(3)
+        )
 
-    shifts = [estimate_fine_shift(approximate_shifts[i], components[i][0], components[i][1], epsilon=epsilon)
-              for i in range(3)]
+    shifts = tuple(
+        estimate_fine_shift(approximate_shifts[i], components[i][0], components[i][1], epsilon=epsilon)
+        for i in range(3)
+    )
 
-    phase_offsets = [estimate_phase_offset(fft_images[i * 3:(i + 1) * 3], shifts[i])
-                     for i in range(3)]
+    phase_offsets = tuple(
+        estimate_phase_offset(fft_images[i * 3:(i + 1) * 3], shifts[i])
+        for i in range(3)
+    )
 
-    # This step is generally not possible to do accurately, so we just hardcode the values, but the estimated values may serve as a quality metric of the reconstruction
-    amplitudes = [estimate_amplitude(components[i], shifts[i], otf)
-                  for i in range(3)]
+    # This step is generally not possible to do accurately, so we just hardcode the values, but the estimated values
+    # may serve as a quality metric of the reconstruction.
+    amplitudes = tuple(estimate_amplitude(components[i], shifts[i], otf) for i in range(3))
 
     return shifts, phase_offsets, amplitudes
 
 
 def estimate_integer_shift(zero_component: np.ndarray, first_component: np.ndarray, min_distance: float,
-                           epsilon: float = 10_000) -> np.ndarray:
-    """Implementation of the method proposed in: https://doi.org/10.1364/BOE.9.005037"""
+                           epsilon: float = 10_000) -> ShiftLike:
+    """Estimate the integer SIM frequency shift.
+
+    Implements the method proposed in https://doi.org/10.1364/BOE.9.005037.
+
+    Args:
+        zero_component: Fourier-domain zero-order component.
+        first_component: Fourier-domain first-order component.
+        min_distance: Minimum distance from the origin for accepted peaks.
+        epsilon: Stabilizer added to component magnitudes.
+
+    Returns:
+        Estimated integer shift as ``(y, x)``.
+    """
 
     size, x, y = _grid(zero_component)
 
@@ -113,11 +183,29 @@ def estimate_integer_shift(zero_component: np.ndarray, first_component: np.ndarr
     return (np.array(peak) + size // 2) % size - size // 2
 
 
-def estimate_fine_shift(approximate_shift, zero_component: np.ndarray, first_component: np.ndarray,
-                        search_range: int = 3, epsilon: float = 10_000):
-    """Implementation of the method proposed in: https://doi.org/10.1364/BOE.9.005037"""
+def estimate_fine_shift(
+        approximate_shift: ShiftLike,
+        zero_component: np.ndarray,
+        first_component: np.ndarray,
+        search_range: int = 3,
+        epsilon: float = 10_000
+) -> np.ndarray:
+    """Refine an approximate SIM frequency shift.
 
-    def f(x):
+    Implements the method proposed in https://doi.org/10.1364/BOE.9.005037.
+
+    Args:
+        approximate_shift: Initial shift estimate as ``(y, x)``.
+        zero_component: Fourier-domain zero-order component.
+        first_component: Fourier-domain first-order component.
+        search_range: Width of the local optimization window in pixels.
+        epsilon: Stabilizer added to component magnitudes.
+
+    Returns:
+        Refined shift estimate as ``(y, x)``.
+    """
+
+    def f(x: np.ndarray) -> float:
         shifted_component = fft2(ifft2(first_component) * fourier_shift_matrix(*first_component.shape[-2:], x[1], x[0]))
         left = zero_component / (np.abs(zero_component) + epsilon)
         right = shifted_component / (np.abs(shifted_component) + epsilon)
@@ -135,8 +223,19 @@ def estimate_fine_shift(approximate_shift, zero_component: np.ndarray, first_com
     return result.x
 
 
-def estimate_amplitude(components: np.ndarray, shift, otf: OTF):
-    """Implementation of the method proposed in: https://doi.org/10.1038/ncomms10980"""
+def estimate_amplitude(components: np.ndarray, shift: ShiftLike, otf: OTF) -> float:
+    """Estimate the SIM modulation amplitude.
+
+    Implements the method proposed in https://doi.org/10.1038/ncomms10980.
+
+    Args:
+        components: Fourier-domain SIM components.
+        shift: Frequency shift for the first-order component.
+        otf: Optical transfer function used to weight the common region.
+
+    Returns:
+        Estimated modulation amplitude.
+    """
     b0, b1 = _common_region(components[0], components[1], shift, otf)
 
     b0_spatial = ifft2(b0)
@@ -147,8 +246,18 @@ def estimate_amplitude(components: np.ndarray, shift, otf: OTF):
     return np.abs(p1)
 
 
-def estimate_phase_offset(fft_images: np.ndarray, shift) -> float:
-    """Adapted implementation of the method proposed in: https://doi.org/10.1038/srep37149"""
+def estimate_phase_offset(fft_images: np.ndarray, shift: ShiftLike) -> float:
+    """Estimate the SIM illumination phase offset.
+
+    Adapted from the method proposed in https://doi.org/10.1038/srep37149.
+
+    Args:
+        fft_images: Fourier-transformed images for one SIM orientation.
+        shift: Frequency shift for the first-order component.
+
+    Returns:
+        Estimated phase offset in radians.
+    """
 
     size = fft_images.shape[-1]
 
@@ -160,8 +269,12 @@ def estimate_phase_offset(fft_images: np.ndarray, shift) -> float:
 
     I_0 = ifft2(padded_components[:, 0]).real
 
-    padded_components[:, 1] = fft2(ifft2(padded_components[:, 1]) * fourier_shift_matrix(size * 2, size * 2, shift[1], shift[0]))
-    padded_components[:, 2] = fft2(ifft2(padded_components[:, 2]) * fourier_shift_matrix(size * 2, size * 2, -shift[1], -shift[0]))
+    padded_components[:, 1] = fft2(
+        ifft2(padded_components[:, 1]) * fourier_shift_matrix(size * 2, size * 2, shift[1], shift[0])
+    )
+    padded_components[:, 2] = fft2(
+        ifft2(padded_components[:, 2]) * fourier_shift_matrix(size * 2, size * 2, -shift[1], -shift[0])
+    )
     fft_result = np.sum(padded_components, 1)
     I_SIM_j = ifft2(fft_result).real
 
@@ -177,7 +290,7 @@ def estimate_phase_offset(fft_images: np.ndarray, shift) -> float:
     return (np.pi - np.copysign(np.pi / 2, amplitude) - phase) % (2 * np.pi)
 
 
-def _deconvolve_richardson_lucy(img: np.ndarray, iterations: int, otf: OTF):
+def _deconvolve_richardson_lucy(img: np.ndarray, iterations: int, otf: OTF) -> np.ndarray:
     otf_mult = otf.draw(img.shape[-1])
     otf_mult_flipped = np.flip(otf_mult)
 
@@ -195,15 +308,21 @@ def _deconvolve_richardson_lucy(img: np.ndarray, iterations: int, otf: OTF):
     return deconv_img
 
 
-def _grid(zero_component: np.ndarray):
+def _grid(zero_component: np.ndarray) -> tuple[int, np.ndarray, np.ndarray]:
     size = zero_component.shape[-1]
     x, y = np.meshgrid(np.hstack([np.arange(size // 2), np.arange(-size // 2, 0)]),
                        np.hstack([np.arange(size // 2), np.arange(-size // 2, 0)]))
     return size, x, y
 
 
-def _common_region(zero_component: np.ndarray, first_component: np.ndarray, shift, otf: OTF,
-                   weight_limit: float = 0.05, min_distance: float = 0.15):
+def _common_region(
+        zero_component: np.ndarray,
+        first_component: np.ndarray,
+        shift: ShiftLike,
+        otf: OTF,
+        weight_limit: float = 0.05,
+        min_distance: float = 0.15
+) -> tuple[np.ndarray, np.ndarray]:
     size, x, y = _grid(zero_component)
 
     weight0 = otf.draw(size)
@@ -221,5 +340,5 @@ def _common_region(zero_component: np.ndarray, first_component: np.ndarray, shif
     return c0, c1
 
 
-def _sine(x, amplitude, phase):
+def _sine(x: np.ndarray, amplitude: float, phase: float) -> np.ndarray:
     return np.sin(x + phase) * amplitude

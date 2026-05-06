@@ -1,15 +1,28 @@
+from collections.abc import Iterator
+
 import numpy as np
 from scipy import ndimage
 from torch.utils.data import IterableDataset
 
-from .sim import illumination_pattern
 from .otf import ModelOTF
-from .reconstruction import cpu_reconstruct
 from .parameters import AcquisitionParameters, ReconstructionParameters
+from .reconstruction import cpu_reconstruct
+from .sim import illumination_pattern
 
 
 class SyntheticDataset(IterableDataset):
-    def __init__(self, contrast_fg_range: tuple[float,float] = (0.0, 1.0), contrast_bg_range: tuple[float,float] = (0.0, 1.0)):
+    """Base class for synthetic TIRF-SIM training datasets.
+
+    Args:
+        contrast_fg_range: Range used to sample foreground contrast.
+        contrast_bg_range: Range used to sample background contrast.
+    """
+
+    def __init__(
+            self,
+            contrast_fg_range: tuple[float, float] = (0.0, 1.0),
+            contrast_bg_range: tuple[float, float] = (0.0, 1.0)
+    ) -> None:
         self.patch_size = 128
 
         self.contrast_fg_range = contrast_fg_range
@@ -26,7 +39,7 @@ class SyntheticDataset(IterableDataset):
 
         self.perlin = PerlinNoise(self.patch_size, 1)
 
-    def _simulate_sim(self, image):
+    def _simulate_sim(self, image: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         angle0 = np.random.uniform(0, np.pi * 2)
         phase_offsets = np.random.uniform(0, np.pi * 2, 3)
 
@@ -57,14 +70,32 @@ class SyntheticDataset(IterableDataset):
         noisy_phase_offsets = np.random.normal(phase_offsets, np.pi / 6)
         noisy_amplitudes = np.random.normal(self.amplitude, 0.1, 3)
 
-        reconstruction = cpu_reconstruct(low_res_images, self.otf, noisy_shifts, noisy_phase_offsets, noisy_amplitudes, self.ap, self.rp)
+        reconstruction = cpu_reconstruct(
+            low_res_images,
+            self.otf,
+            noisy_shifts,
+            noisy_phase_offsets,
+            noisy_amplitudes,
+            self.ap,
+            self.rp
+        )
         return (reconstruction - np.mean(reconstruction)) / np.std(reconstruction), illumination, low_res_images 
 
 
 class SyntheticCCPDataset(SyntheticDataset):
+    """Iterable dataset that generates synthetic clathrin-coated pit detection samples.
+
+    Args:
+        min_n: Minimum number of CCPs per sample.
+        max_n: Maximum number of CCPs per sample.
+        radius: Maximum radius used for synthetic CCP ring shapes.
+        contrast_fg_range: Range used to sample foreground contrast.
+        contrast_bg_range: Range used to sample background contrast.
+    """
+
     def __init__(self, min_n: int = 5, max_n: int = 15, radius: float = 2.5,
                  contrast_fg_range: tuple[float, float] = (0.0, 1.0),
-                 contrast_bg_range: tuple[float, float] = (0.0, 1.0)):
+                 contrast_bg_range: tuple[float, float] = (0.0, 1.0)) -> None:
         super().__init__(
             contrast_fg_range=contrast_fg_range,
             contrast_bg_range=contrast_bg_range
@@ -95,11 +126,16 @@ class SyntheticCCPDataset(SyntheticDataset):
         # Patch positions
         self.yyy, self.xxx = np.mgrid[:self.patch_size, :self.patch_size]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[tuple[np.ndarray, np.ndarray]]:
         while True:
             yield self.data_sample()
 
-    def data_sample(self):
+    def data_sample(self) -> tuple[np.ndarray, np.ndarray]:
+        """Generate one synthetic CCP detection sample.
+
+        Returns:
+            Tuple containing a reconstructed SIM patch and a CCP target map.
+        """
         # Generate positions and classes
         n = np.random.randint(self.min_n, self.max_n)
         indices = np.random.choice(len(self.yy), size=n, replace=False)
@@ -132,7 +168,9 @@ class SyntheticCCPDataset(SyntheticDataset):
 
 
 class SyntheticAdipocytesCCPDataset(SyntheticCCPDataset):
-    def __init__(self):
+    """Synthetic CCP dataset variant tuned for adipocyte-like CCP samples."""
+
+    def __init__(self) -> None:
         super().__init__()
 
         self.radius = 3.5
@@ -141,7 +179,9 @@ class SyntheticAdipocytesCCPDataset(SyntheticCCPDataset):
 
 
 class SyntheticExocytosisDataset(SyntheticDataset):
-    def __init__(self):
+    """Iterable dataset that generates synthetic exocytosis detection samples."""
+
+    def __init__(self) -> None:
         super().__init__()
 
         self.patch_size = 128
@@ -163,11 +203,16 @@ class SyntheticExocytosisDataset(SyntheticDataset):
         self.ternary_perlin = PerlinNoise(self.patch_size, 8)
         self.perlin = lambda: self.primary_perlin() + 0.75 * self.secondary_perlin() + 0.5 * self.ternary_perlin()
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[tuple[np.ndarray, np.ndarray]]:
         while True:
             yield self.data_sample()
 
-    def data_sample(self):
+    def data_sample(self) -> tuple[np.ndarray, np.ndarray]:
+        """Generate one synthetic exocytosis detection sample.
+
+        Returns:
+            Tuple containing a reconstructed SIM patch and a two-channel target map.
+        """
         # Generate positions and shapes
         n = np.random.randint(self.min_vesicles_n, self.max_vesicles_n) + 1
         indices = np.random.choice(len(self.yy), size=n, replace=False)
@@ -272,7 +317,7 @@ class SyntheticExocytosisDataset(SyntheticDataset):
 
         return x, y
 
-    def _draw_points(self, img, pos):
+    def _draw_points(self, img: np.ndarray, pos: np.ndarray) -> None:
         y, x = np.clip(pos, 0, self.patch_size - 1)
 
         x1 = np.floor(x).astype(int)
@@ -300,14 +345,16 @@ class SyntheticExocytosisDataset(SyntheticDataset):
 
 
 class PerlinNoise:
-    """Adapted from: https://github.com/pvigier/perlin-numpy"""
+    """Perlin noise generator adapted from https://github.com/pvigier/perlin-numpy."""
 
     _SQRT_2_INV = 2 ** -0.5
 
-    def __init__(self, size: int, resolution: int):
-        """
-        :param size: length of both dimensions of the generated noise image
-        :param resolution: number of noise periods to generate along each axis
+    def __init__(self, size: int, resolution: int) -> None:
+        """Initialize the Perlin noise generator.
+
+        Args:
+            size: Length of both dimensions of the generated noise image.
+            resolution: Number of noise periods to generate along each axis.
         """
 
         meshgrid = np.mgrid[0:resolution:resolution / size, 0:resolution:resolution / size]
@@ -318,8 +365,10 @@ class PerlinNoise:
         self.sample_size = (resolution + 1, resolution + 1)
 
     def __call__(self) -> np.ndarray:
-        """
-        Returned values are always in the [0, 1] range with ~0.5 mean
+        """Generate a noise image.
+
+        Returns:
+            Noise image with values in the ``[0, 1]`` range and approximately ``0.5`` mean.
         """
         angles = 2 * np.pi * np.random.random_sample(self.sample_size)
         gradients = np.dstack((np.cos(angles), np.sin(angles))).repeat(self.d, 0).repeat(self.d, 1)
@@ -335,5 +384,5 @@ class PerlinNoise:
         return 0.5 + self._SQRT_2_INV * (n0 * (1 - self.t[1]) + n1 * self.t[1])
 
     @staticmethod
-    def _fade(t):
+    def _fade(t: np.ndarray) -> np.ndarray:
         return 6 * t ** 5 - 15 * t ** 4 + 10 * t ** 3

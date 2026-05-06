@@ -3,42 +3,46 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class AcquisitionParameters:
-    """
-    Represents the acquisition parameters for a microscopy image dataset.
+    """Acquisition parameters for a microscopy image dataset.
 
-    :ivar image_size: Size of one side of the field of view in pixels (before reconstruction, assumes square images).
-    :ivar na: Numerical aperture of the microscope.
-    :ivar pixel_size: Physical pixel size of the camera sensor in micrometers.
-    :ivar wavelength: Emission wavelength in nanometers.
-    :ivar frame_rate: FPS of the acquired movie in Hz (1/s). Default is None for single snapshots.
+    Attributes:
+        image_size: Size of one side of the field of view in pixels before reconstruction. Images are assumed to be
+            square.
+        na: Numerical aperture of the microscope.
+        pixel_size: Physical pixel size of the camera sensor in micrometers.
+        wavelength: Emission wavelength in nanometers.
+        frame_rate: FPS of the acquired movie in Hz. ``None`` represents a single snapshot.
     """
     image_size: int
     na: float
     pixel_size: float
     wavelength: float
-    frame_rate: float = None
+    frame_rate: float | None = None
 
     @property
     def lr_size(self) -> int:
+        """Low-resolution image size in pixels."""
         return self.image_size
 
     @property
     def hr_size(self) -> int:
+        """High-resolution reconstruction size in pixels."""
         return self.image_size * 2
 
 
 @dataclass(frozen=True)
 class ReconstructionParameters:
-    """
-    Represents the parameters for reconstructing SIM images using a generalized Wiener filter.
+    """Parameters for reconstructing SIM images with a generalized Wiener filter.
 
-    :ivar apodization_cutoff: Cutoff frequency for apodization, given as a multiple of the diffraction limit.
-    :ivar apodization_bend: Slope of the apodization function.
-    :ivar background_intensity: Base background intensity level to be subtracted before reconstruction.
-    :ivar border_fade: Number of pixels over which the image will be faded to zero at the borders to reduce edge artifacts.
-    :ivar minimum_peak_distance: Minimum distance at which a peak is searched for during parameter estimation, given as a multiple of the diffraction limit.
-    :ivar rl_deconvolution_iterations: Number of iterations for Richardson-Lucy deconvolution preprocessing.
-    :ivar wiener_parameter: Regularization parameter for Wiener filter reconstruction.
+    Attributes:
+        apodization_cutoff: Cutoff frequency for apodization, given as a multiple of the diffraction limit.
+        apodization_bend: Slope of the apodization function.
+        background_intensity: Base background intensity level to subtract before reconstruction.
+        border_fade: Number of pixels over which the image fades to zero at the borders to reduce edge artifacts.
+        minimum_peak_distance: Minimum distance at which a peak is searched for during parameter estimation, given as a
+            multiple of the diffraction limit.
+        rl_deconvolution_iterations: Number of Richardson-Lucy deconvolution preprocessing iterations.
+        wiener_parameter: Regularization parameter for Wiener filter reconstruction.
     """
     apodization_cutoff: float = 2.0
     apodization_bend: float = 0.9
@@ -50,20 +54,21 @@ class ReconstructionParameters:
 
     @property
     def w(self) -> float:
+        """Alias for ``wiener_parameter``."""
         return self.wiener_parameter
 
 
 @dataclass(frozen=True)
 class LinkingParameters:
-    """
-    Represents the parameters for linking detected features across frames in a microscopy image sequence.
+    """Parameters for linking detected features across microscopy frames.
 
-    :ivar birth_death_cost: Cost of initiating or terminating a track.
-    :ivar edge_removal_cost: Cost of removing a link between tracklets during the untangling step.
-    :ivar feature_cost_multiplier: Scaling factor for the feature difference component of the matching cost.
-    :ivar maximum_distance: Maximum distance between detections to be considered for linking.
-    :ivar maximum_skipped_frames: Maximum number of additional frames between detections to still be considered for linking.
-    :ivar minimum_length: Minimum length (inclusive) of a track to be retained after linking.
+    Attributes:
+        birth_death_cost: Cost of initiating or terminating a track.
+        edge_removal_cost: Cost of removing a link between tracklets during the untangling step.
+        feature_cost_multiplier: Scaling factor for the feature difference component of the matching cost.
+        maximum_distance: Maximum distance between detections considered for linking.
+        maximum_skipped_frames: Maximum number of additional frames between detections to still consider for linking.
+        minimum_length: Minimum inclusive length of a track retained after linking.
     """
     birth_death_cost: float
     edge_removal_cost: float

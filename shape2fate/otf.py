@@ -7,36 +7,46 @@ from .sim import diffraction_limit
 
 
 class OTF(ABC):
-    """
-    The Optical Transfer Function (OTF) of the optical system.
-    """
+    """Optical transfer function (OTF) of an optical system."""
 
     @abstractmethod
     def __call__(self, x: float | np.ndarray) -> float | np.ndarray:
-        """
-        Evaluate the Optical Transfer Function at a given spatial frequency normalized to the range [0, 1], with 0 representing the DC (zero frequency) and 1 corresponding to the maximum spatial frequency at the edge of the function's support. Values outside the range [0, 1] are undefined.
+        """Evaluate the OTF at a normalized spatial frequency.
+
+        Args:
+            x: Spatial frequency normalized to ``[0, 1]``, where ``0`` is DC (zero frequency) and ``1`` is the maximum
+                supported spatial frequency.
+
+        Returns:
+            OTF value at ``x``. Values outside ``[0, 1]`` are undefined.
         """
         pass
 
     @abstractmethod
     def draw(self, size: int | tuple[int, int], x_shift: float = 0, y_shift: float = 0) -> np.ndarray:
-        """
-        Draw the Optical Transfer Function on a 2D grid in frequency space.
+        """Draw the OTF on a 2D frequency-space grid.
 
-        This method generates and visualizes the OTF over a specified grid size. The grid can be a square or rectangular array, and optional shifts in the x and y directions can be applied.
+        Args:
+            size: Grid size. An integer creates a square grid; a tuple creates a ``(height, width)`` grid.
+            x_shift: Shift along the x-axis in frequency space.
+            y_shift: Shift along the y-axis in frequency space.
+
+        Returns:
+            OTF sampled on the requested grid.
         """
         pass
 
 
 class ModelOTF(OTF):
-    """
-    An exponential approximation of the ideal OTF.
-    """
+    """Exponential approximation of the ideal OTF."""
 
-    def __init__(self, ap: AcquisitionParameters, curvature: float = 0.3):
-        """
-        :param ap: Acquisition parameters of the experiment.
-        :param curvature: Bend of the approximation OTF model function in [0, 1] range where 1 is a perfect OTF.
+    def __init__(self, ap: AcquisitionParameters, curvature: float = 0.3) -> None:
+        """Initialize the model OTF.
+
+        Args:
+            ap: Acquisition parameters of the experiment.
+            curvature: Bend of the approximation OTF model function in the ``[0, 1]`` range, where ``1`` is a
+                perfect OTF.
         """
         self.image_cutoff = diffraction_limit(ap.na, ap.wavelength, ap.pixel_size, ap.image_size)
         self.curvature = curvature
@@ -54,14 +64,14 @@ class ModelOTF(OTF):
 
 # TODO: Implement this for a specific example
 class MeasuredOTF(OTF):
-    """
-    OTF based on measured data, either directly as an OTF or from a measured PSF.
-    """
+    """OTF based on measured data, either directly or from a measured PSF."""
 
-    def __init__(self, samples: np.ndarray, image_cutoff: float):
-        """
-        :param samples: The measured OTF data samples.
-        :param image_cutoff: The cutoff frequency of the OTF.
+    def __init__(self, samples: np.ndarray, image_cutoff: float) -> None:
+        """Initialize a measured OTF.
+
+        Args:
+            samples: Measured OTF data samples.
+            image_cutoff: Cutoff frequency of the OTF.
         """
         self.samples = samples
         self.image_cutoff = image_cutoff

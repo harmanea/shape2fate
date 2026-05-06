@@ -1,6 +1,7 @@
 import itertools
 from collections import defaultdict
-from typing import Callable
+from collections.abc import Callable
+from types import NotImplementedType
 
 import numpy as np
 import pandas as pd
@@ -9,42 +10,42 @@ from scipy import spatial, optimize
 
 
 class Node:
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.name = name
 
         self.in_edges: list['Edge'] = []
         self.out_edges: list['Edge'] = []
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{[e.u for e in self.in_edges]} -> {self.name} -> {[e.v for e in self.out_edges]}'
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.name
 
-    def create_flow_constraint(self, solver: pywraplp.Solver):
+    def create_flow_constraint(self, solver: pywraplp.Solver) -> None:
         solver.Add(sum([edge.flow for edge in self.in_edges]) == sum([edge.flow for edge in self.out_edges]))
 
-    def create_assignment_constraint(self, solver: pywraplp.Solver, value: int = 1):
+    def create_assignment_constraint(self, solver: pywraplp.Solver, value: int = 1) -> None:
         solver.Add(sum([edge.flow for edge in self.in_edges]) == value)
 
-    def create_source_constraint(self, solver: pywraplp.Solver, value: int):
+    def create_source_constraint(self, solver: pywraplp.Solver, value: int) -> None:
         solver.Add(sum([edge.flow for edge in self.out_edges]) == value)
 
 
 class DetectionNode(Node):
-    def __init__(self, frame: int, index: int):
+    def __init__(self, frame: int, index: int) -> None:
         super().__init__(f'o{index},{frame}')
         self.frame = frame
         self.index = index
 
 
 class MergeNode(Node):
-    def __init__(self, into_node: DetectionNode):
+    def __init__(self, into_node: DetectionNode) -> None:
         super().__init__(f'm{into_node.index},{into_node.frame - 1}')
         self.into_node = into_node
 
     # noinspection DuplicatedCode
-    def create_merge_constraint(self, solver: pywraplp.Solver):
+    def create_merge_constraint(self, solver: pywraplp.Solver) -> None:
         assert len(self.out_edges) == 2, 'merge nodes must have exactly two outgoing edges'
 
         edge_to_death_node = [edge for edge in self.out_edges if isinstance(edge.v, DeathNode)][0]
@@ -56,14 +57,14 @@ class MergeNode(Node):
 
 
 class SkipNode(Node):
-    def __init__(self, from_node: DetectionNode, skipped_frames: int):
+    def __init__(self, from_node: DetectionNode, skipped_frames: int) -> None:
         super().__init__(f'x{from_node.index},{from_node.frame + skipped_frames - 1}')
         self.from_node = from_node
         self.skipped_frames = skipped_frames
 
 
 class SplitNode(Node):
-    def __init__(self, from_node: DetectionNode | SkipNode):
+    def __init__(self, from_node: DetectionNode | SkipNode) -> None:
         if isinstance(from_node, DetectionNode):
             index, frame = from_node.index, from_node.frame + 1
         elif isinstance(from_node, SkipNode):
@@ -78,7 +79,7 @@ class SplitNode(Node):
         self.index = index
 
     # noinspection DuplicatedCode
-    def create_split_constraint(self, solver: pywraplp.Solver):
+    def create_split_constraint(self, solver: pywraplp.Solver) -> None:
         assert len(self.in_edges) == 2, 'split nodes must have exactly two incoming edges'
 
         edge_from_birth_node = [edge for edge in self.in_edges if isinstance(edge.u, BirthNode)][0]
@@ -90,35 +91,35 @@ class SplitNode(Node):
 
 
 class BirthNode(Node):
-    def __init__(self, frame: int):
+    def __init__(self, frame: int) -> None:
         super().__init__(f'b{frame}')
         self.frame = frame
 
 
 class DeathNode(Node):
-    def __init__(self, frame: int):
+    def __init__(self, frame: int) -> None:
         super().__init__(f'd{frame}')
         self.frame = frame
 
 
 class Edge:
-    def __init__(self, u: Node, v: Node, unit_cost: float, flow: pywraplp.Solver.IntVar):
+    def __init__(self, u: Node, v: Node, unit_cost: float, flow: pywraplp.Solver.IntVar) -> None:
         self.u = u
         self.v = v
         self.unit_cost = unit_cost
         self.flow = flow
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.u.name} -> {self.v.name}'
 
 
 class Tracklet:
-    def __init__(self, index: int):
+    def __init__(self, index: int) -> None:
         self.index = index
 
-        self.predecessors = set()
-        self.successors = set()
-        self.detections = {}
+        self.predecessors: set[Tracklet] = set()
+        self.successors: set[Tracklet] = set()
+        self.detections: dict[int, list[int]] = {}
 
     def t_start(self) -> int:
         return min(self.detections.keys())
@@ -132,35 +133,45 @@ class Tracklet:
     def has_predecessors(self) -> bool:
         return len(self.predecessors) > 0
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'#{self.index} : {list(self.predecessors)} -> {self.detections} -> {list(self.successors)}'
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str(self.index)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.index)
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool | NotImplementedType:
         if not isinstance(other, Tracklet):
             return NotImplemented
         return self.index == other.index
 
-    def __lt__(self, other):
+    def __lt__(self, other: object) -> bool | NotImplementedType:
         if not isinstance(other, Tracklet):
             return NotImplemented
         return self.index < other.index
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.detections)
 
 
 class LinkingGraph:
+    """Mixed-integer graph for linking frame-wise detections into tracklets.
+
+    Args:
+        detections: Detection table with at least a ``frame`` column and one row per detection.
+        dist_function: Function returning pairwise linking costs between detections in two frames.
+        max_linking_distance: Maximum cost at which detections can be linked.
+        birth_death_cost: Cost, or function returning a cost, for starting or ending a track.
+        max_skipped_frames: Maximum number of intermediate frames a link may skip.
+    """
+
     def __init__(self, detections: pd.DataFrame,
                  dist_function: Callable[[pd.DataFrame, pd.DataFrame], np.ndarray],
                  max_linking_distance: float,
                  birth_death_cost: Callable[[pd.Series], float] | float,
-                 max_skipped_frames: int = 1):
+                 max_skipped_frames: int = 1) -> None:
 
         self.solver = pywraplp.Solver.CreateSolver('SCIP')
         self.objective = []
@@ -174,7 +185,7 @@ class LinkingGraph:
         birth_nodes = [BirthNode(frame) for frame in range(n_frames - 1)]
         death_nodes = [DeathNode(frame) for frame in range(1, n_frames)]
 
-        self.nodes = [[] for _ in range(n_frames)]
+        self.nodes: list[list[DetectionNode]] = [[] for _ in range(n_frames)]
         for detection in detections.itertuples():
             self.nodes[detection.frame].append(DetectionNode(detection.frame, detection.Index))
 
@@ -184,7 +195,7 @@ class LinkingGraph:
             for ia, ib in np.argwhere(distances < max_linking_distance):
                 self._create_edge(self.nodes[frame][ia], self.nodes[frame + 1][ib], distances[ia, ib], 1)
 
-        skip_nodes = []
+        skip_nodes: list[SkipNode] = []
         for skipped_frames in range(2, max_skipped_frames + 2):
             for frame in range(0, n_frames - skipped_frames):
                 distances = dist_function(detections[detections.frame == frame],
@@ -200,9 +211,15 @@ class LinkingGraph:
                     self._create_edge(self.nodes[frame][ia], skip_node, 0, 1)
 
                     for ib in np.squeeze(indices, 1):
-                        self._create_edge(skip_node, self.nodes[frame + skipped_frames][ib], distances[ia, ib] * skipped_frames, 1)
+                        self._create_edge(
+                            skip_node,
+                            self.nodes[frame + skipped_frames][ib],
+                            distances[ia, ib] * skipped_frames,
+                            1
+                        )
 
-        merge_nodes, split_nodes = [], []
+        merge_nodes: list[MergeNode] = []
+        split_nodes: list[SplitNode] = []
         for node in itertools.chain.from_iterable(self.nodes):
             if len(node.in_edges) > 1:
                 merge_nodes.append(MergeNode(node))
@@ -219,7 +236,11 @@ class LinkingGraph:
 
         # Split edges
         for split_node in split_nodes:
-            into_nodes = [(edge.v, edge.unit_cost) for edge in split_node.from_node.out_edges if isinstance(edge.v, DetectionNode)]
+            into_nodes = [
+                (edge.v, edge.unit_cost)
+                for edge in split_node.from_node.out_edges
+                if isinstance(edge.v, DetectionNode)
+            ]
             self._create_edge(birth_nodes[split_node.frame - 1], split_node, 0, len(into_nodes))
             self._create_edge(split_node.from_node, split_node, 0, 1)
             for into_node, cost in into_nodes:
@@ -233,21 +254,24 @@ class LinkingGraph:
 
         # Sink edges
         for frame in range(n_frames - 1):
-            self._create_edge(death_nodes[frame], sink, 0, sum([n_detections[frame - i] for i in range(-1, max_skipped_frames + 1)]))
+            capacity = sum([n_detections[frame - i] for i in range(-1, max_skipped_frames + 1)])
+            self._create_edge(death_nodes[frame], sink, 0, capacity)
         for node in self.nodes[-1]:
             self._create_edge(node, sink, 0, 1)
 
         # Birth edges
         for frame in range(n_frames - 1):
             for node in self.nodes[frame + 1]:
-                self._create_edge(birth_nodes[frame], node, birth_death_cost(detections.iloc[node.index]) if callable(birth_death_cost) else birth_death_cost, 1)
+                cost = birth_death_cost(detections.iloc[node.index]) if callable(birth_death_cost) else birth_death_cost
+                self._create_edge(birth_nodes[frame], node, cost, 1)
 
             self._create_edge(birth_nodes[frame], death_nodes[frame], 0, n_detections[frame + 1])
 
         # Death edges
         for frame in range(n_frames - 1):
             for node in self.nodes[frame]:
-                self._create_edge(node, death_nodes[frame], birth_death_cost(detections.iloc[node.index]) if callable(birth_death_cost) else birth_death_cost, 1)
+                cost = birth_death_cost(detections.iloc[node.index]) if callable(birth_death_cost) else birth_death_cost
+                self._create_edge(node, death_nodes[frame], cost, 1)
 
         # Constraints
         for node in itertools.chain.from_iterable(self.nodes):
@@ -278,7 +302,7 @@ class LinkingGraph:
         objective = self.solver.Sum(self.objective)
         self.solver.Minimize(objective)
 
-    def _create_edge(self, u: Node, v: Node, unit_cost: float, capacity: int):
+    def _create_edge(self, u: Node, v: Node, unit_cost: float, capacity: int) -> None:
         flow = self.solver.IntVar(0, capacity, self.__str__())
 
         e = Edge(u, v, unit_cost, flow)
@@ -289,11 +313,21 @@ class LinkingGraph:
             self.objective.append(flow * unit_cost)
 
     def solve(self) -> int:
+        """Solve the linking optimization problem.
+
+        Returns:
+            OR-Tools solver status code.
+        """
         return self.solver.Solve()
 
     def get_result(self) -> list[Tracklet]:
-        tracklets = []
-        node_tracklets = {}
+        """Convert the solved graph into linked tracklets.
+
+        Returns:
+            Tracklets produced by the positive-flow solution.
+        """
+        tracklets: list[Tracklet] = []
+        node_tracklets: dict[int, Tracklet] = {}
 
         for node in itertools.chain.from_iterable(self.nodes):
             if node.frame == 0:
@@ -363,7 +397,14 @@ class LinkingGraph:
 
 
 class UntanglingGraph:
-    def __init__(self, tracklets: list[Tracklet], gamma: float):
+    """Mixed-integer graph for resolving merge and split ambiguities between tracklets.
+
+    Args:
+        tracklets: Tracklets produced by ``LinkingGraph``.
+        gamma: Cost multiplier for removing an edge between tracklets.
+    """
+
+    def __init__(self, tracklets: list[Tracklet], gamma: float) -> None:
         self.solver = pywraplp.Solver.CreateSolver('SCIP')
 
         self.tracklets = tracklets
@@ -377,7 +418,7 @@ class UntanglingGraph:
         self.merge_sets: dict[Tracklet, list[tuple[Tracklet, ...]]] = defaultdict(list)
 
         # Find merge sets
-        tracklet_sets = set()
+        tracklet_sets: set[tuple[Tracklet, ...]] = set()
         for t in tracklets:
             for p in t.predecessors:
                 self.edge_removals[(p, t)] = self.solver.BoolVar(f'e_{p.index}_{t.index}')
@@ -435,7 +476,10 @@ class UntanglingGraph:
 
                 number_of_predecessors = len(t.predecessors)
 
-                self.solver.Add(-remove_edges_to_predecessors - merge_predecessors - split_self <= 1 - number_of_predecessors)
+                self.solver.Add(
+                    -remove_edges_to_predecessors - merge_predecessors - split_self
+                    <= 1 - number_of_predecessors
+                )
 
         # Successor constraints
         for t in tracklets:
@@ -481,7 +525,10 @@ class UntanglingGraph:
                 removals = [self.edge_removals[(p, s)] for p in merge_set for s in other_merge_set if s in p.successors]
                 if len(removals) > 1:
                     other_track_merge = self.tracklet_merges[other_merge_set]
-                    self.solver.Add(1 + len(removals) * (1 - track_merge) + len(removals) * (1 - other_track_merge) >= sum(removals))
+                    self.solver.Add(
+                        1 + len(removals) * (1 - track_merge) + len(removals) * (1 - other_track_merge)
+                        >= sum(removals)
+                    )
 
         # Define objective
         objective = sum(self.edge_removals.values()) * gamma \
@@ -493,10 +540,23 @@ class UntanglingGraph:
         self.solver.Minimize(objective)
 
     def solve(self) -> int:
+        """Solve the untangling optimization problem.
+
+        Returns:
+            OR-Tools solver status code.
+        """
         return self.solver.Solve()
 
     def get_result(self, detections: pd.DataFrame) -> pd.DataFrame:
-        tracklets_to_remove = set()
+        """Convert the solved untangling graph into a trajectory table.
+
+        Args:
+            detections: Original detections used to build the linking graph.
+
+        Returns:
+            DataFrame with ``track_id``, ``x``, ``y``, ``si``, and ``frame`` columns.
+        """
+        tracklets_to_remove: set[Tracklet] = set()
 
         # Cut edges
         for (p, s), e in self.edge_removals.items():
@@ -529,7 +589,7 @@ class UntanglingGraph:
                     for s in t.successors:
                         s.predecessors.remove(t)
 
-                merged = defaultdict(list)
+                merged: defaultdict[int, list[int]] = defaultdict(list)
                 for t in tracklet_set:
                     for f, d in t.detections.items():
                         merged[f].extend(d)
@@ -543,7 +603,7 @@ class UntanglingGraph:
 
                 n_split = int(tracklet_split.solution_value()) + 1
 
-                new_tracklets = []
+                new_tracklets: list[Tracklet] = []
                 for _ in range(n_split):
                     new_tracklet = Tracklet(len(self.tracklets))
                     new_tracklet.detections = t.detections.copy()
@@ -579,11 +639,14 @@ class UntanglingGraph:
                         last_p_detection = p.detections[p.t_end()]
                         first_s_detection = s.detections[s.t_start()]
                         for frame in new_tracklet.detections.keys():
-                            new_tracklet.detections[frame] = new_tracklet.detections[frame] + last_p_detection + first_s_detection
+                            new_tracklet.detections[frame] = (
+                                new_tracklet.detections[frame] + last_p_detection + first_s_detection
+                            )
 
                 n_diff = len(t.predecessors) - len(t.successors)
                 if n_diff > 0:
-                    for p, new_tracklet in zip([p for p in t.predecessors if not p.has_successors()], new_tracklets[-n_diff:]):
+                    unmatched_predecessors = [p for p in t.predecessors if not p.has_successors()]
+                    for p, new_tracklet in zip(unmatched_predecessors, new_tracklets[-n_diff:]):
                         p.successors.add(new_tracklet)
                         new_tracklet.predecessors.add(p)
 
@@ -592,7 +655,8 @@ class UntanglingGraph:
                             new_tracklet.detections[frame] = new_tracklet.detections[frame] + last_p_detection
 
                 elif n_diff < 0:
-                    for s, new_tracklet in zip([s for s in t.successors if not s.has_predecessors()], new_tracklets[n_diff:]):
+                    unmatched_successors = [s for s in t.successors if not s.has_predecessors()]
+                    for s, new_tracklet in zip(unmatched_successors, new_tracklets[n_diff:]):
                         s.predecessors.add(new_tracklet)
                         new_tracklet.successors.add(s)
 
@@ -639,7 +703,13 @@ class UntanglingGraph:
         return pd.DataFrame(data=data)
 
 
-def print_solver_status(status, solver):
+def print_solver_status(status: int, solver: pywraplp.Solver) -> None:
+    """Print a human-readable OR-Tools solver status.
+
+    Args:
+        status: Status code returned by an OR-Tools solver.
+        solver: Solver instance that produced the status.
+    """
     match status:
         case solver.OPTIMAL:
             print(f'Optimal solution with objective value {solver.Objective().Value():.2f}'
