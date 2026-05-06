@@ -554,7 +554,7 @@ class UntanglingGraph:
             detections: Original detections used to build the linking graph.
 
         Returns:
-            DataFrame with ``track_id``, ``x``, ``y``, ``si``, and ``frame`` columns.
+            DataFrame with ``particle``, ``x``, ``y``, ``cls``, and ``frame`` columns.
         """
         tracklets_to_remove: set[Tracklet] = set()
 
@@ -688,15 +688,15 @@ class UntanglingGraph:
                 d = detections.iloc[detection]
                 x_coords.append(np.mean(d.x))
                 y_coords.append(np.mean(d.y))
-                classes.append(np.mean(d.si))
+                classes.append(np.mean(d.cls))
                 frames.append(f)
                 indices.append(t.index)
 
         data = {
-            'track_id': np.array(indices),
+            'particle': np.array(indices),
             'x': np.array(x_coords),
             'y': np.array(y_coords),
-            'si': np.array(classes),
+            'cls': np.array(classes),
             'frame': np.array(frames)
         }
 

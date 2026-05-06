@@ -14,7 +14,7 @@ def generate_exo_detections(model: torch.nn.Module, device: torch.device, images
         images: Image stack with shape ``(frames, height, width)``.
 
     Returns:
-        DataFrame with ``x``, ``y``, ``si``, and ``frame`` columns.
+        DataFrame with ``x``, ``y``, ``cls``, and ``frame`` columns.
     """
     model.to(device).eval()
 
@@ -30,22 +30,22 @@ def generate_exo_detections(model: torch.nn.Module, device: torch.device, images
             torch_image = torch.from_numpy(normalize_img(img)).to(device, torch.float32).expand(1, 1, -1, -1)
             predictions = torch.sigmoid(model(torch_image)).squeeze().cpu().numpy()
 
-        for si, si_predictions in enumerate(predictions):
-            n_labels, labels = cv.connectedComponents((si_predictions > 0.1).astype(np.uint8))
+        for cls, cls_predictions in enumerate(predictions):
+            n_labels, labels = cv.connectedComponents((cls_predictions > 0.1).astype(np.uint8))
 
             for l in range(1, n_labels):
                 mask = labels == l
 
-                if np.any(si_predictions[mask] > 0.4 + 0.1 * si):
+                if np.any(cls_predictions[mask] > 0.4 + 0.1 * cls):
                     frames.append(f)
                     y_coords.append(yy[mask].mean())
                     x_coords.append(xx[mask].mean())
-                    classes.append(si)
+                    classes.append(cls)
 
     data = {
         'x': np.array(x_coords),
         'y': np.array(y_coords),
-        'si': np.array(classes),
+        'cls': np.array(classes),
         'frame': np.array(frames)
     }
 
@@ -61,7 +61,7 @@ def generate_ccp_detections(model: torch.nn.Module, device: torch.device, images
         images: Image stack with shape ``(frames, height, width)``.
 
     Returns:
-        DataFrame with ``x``, ``y``, ``si``, and ``frame`` columns.
+        DataFrame with ``x``, ``y``, ``cls``, and ``frame`` columns.
     """
     model.to(device).eval()
 
@@ -88,7 +88,7 @@ def generate_ccp_detections(model: torch.nn.Module, device: torch.device, images
     data = {
         'x': np.concatenate(x_coords),
         'y': np.concatenate(y_coords),
-        'si': np.concatenate(classes),
+        'cls': np.concatenate(classes),
         'frame': np.concatenate(frames)
     }
 

@@ -31,15 +31,15 @@ def temporal_intersection_over_union(a: pd.DataFrame, b: pd.DataFrame, threshold
     return intersection / union
 
 
-_columns = ['x', 'y', 'frame', 'track_id']
+_columns = ['x', 'y', 'frame', 'particle']
 
 
 def mean_temporal_intersection_over_union(a: pd.DataFrame, b: pd.DataFrame, threshold: float) -> dict[str, float]:
     """Compute mean temporal intersection over union between two track sets.
 
     Args:
-        a: First track set with ``x``, ``y``, ``frame``, and ``track_id`` columns.
-        b: Second track set with ``x``, ``y``, ``frame``, and ``track_id`` columns.
+        a: First track set with ``x``, ``y``, ``frame``, and ``particle`` columns.
+        b: Second track set with ``x``, ``y``, ``frame``, and ``particle`` columns.
         threshold: Maximum Euclidean distance between detections for them to be considered overlapping.
 
     Returns:
@@ -83,8 +83,8 @@ def mot_metrics(a: pd.DataFrame, b: pd.DataFrame, threshold: float) -> dict[str,
     """Compute CLEAR MOT tracking metrics.
 
     Args:
-        a: Ground-truth detections with ``x``, ``y``, ``frame``, and ``track_id`` columns.
-        b: Tracker detections with ``x``, ``y``, ``frame``, and ``track_id`` columns.
+        a: Ground-truth detections with ``x``, ``y``, ``frame``, and ``particle`` columns.
+        b: Tracker detections with ``x``, ``y``, ``frame``, and ``particle`` columns.
         threshold: Maximum distance for matching detections.
 
     Returns:
@@ -115,8 +115,8 @@ def mot_metrics(a: pd.DataFrame, b: pd.DataFrame, threshold: float) -> dict[str,
 
         current_matched = {}
         for ai, bi in zip(a_ind[mask], b_ind[mask]):
-            p = b_at_f.track_id.iat[bi]
-            matched_to = a_at_f.track_id.iat[ai]
+            p = b_at_f.particle.iat[bi]
+            matched_to = a_at_f.particle.iat[ai]
 
             current_matched[p] = matched_to
 
@@ -149,16 +149,16 @@ def hota(gt: pd.DataFrame, tr: pd.DataFrame, threshold: float) -> dict[str, floa
         false-positive metrics.
     """
 
-    # Ensure track ids are sorted from 0 to max(n)
+    # Ensure particle ids are sorted from 0 to max(n)
     gt = gt.copy()
     tr = tr.copy()
 
-    gt.track_id = gt.track_id.map({old: new for old, new in zip(gt.track_id.unique(), range(gt.track_id.nunique()))})
-    tr.track_id = tr.track_id.map({old: new for old, new in zip(tr.track_id.unique(), range(tr.track_id.nunique()))})
+    gt.particle = gt.particle.map({old: new for old, new in zip(gt.particle.unique(), range(gt.particle.nunique()))})
+    tr.particle = tr.particle.map({old: new for old, new in zip(tr.particle.unique(), range(tr.particle.nunique()))})
 
     # Initialization
-    num_gt_ids = gt.track_id.nunique()
-    num_tr_ids = tr.track_id.nunique()
+    num_gt_ids = gt.particle.nunique()
+    num_tr_ids = tr.particle.nunique()
 
     frames = sorted(set(gt.frame.unique()) | set(tr.frame.unique()))
 
@@ -176,8 +176,8 @@ def hota(gt: pd.DataFrame, tr: pd.DataFrame, threshold: float) -> dict[str, floa
 
     # Accumulate global track information
     for t in frames:
-        gt_ids_t = gt[gt.frame == t].track_id.to_numpy()
-        tr_ids_t = tr[tr.frame == t].track_id.to_numpy()
+        gt_ids_t = gt[gt.frame == t].particle.to_numpy()
+        tr_ids_t = tr[tr.frame == t].particle.to_numpy()
 
         similarity = similarities[t]
         sim_iou_denom = similarity.sum(0)[np.newaxis, :] + similarity.sum(1)[:, np.newaxis] - similarity
@@ -194,8 +194,8 @@ def hota(gt: pd.DataFrame, tr: pd.DataFrame, threshold: float) -> dict[str, floa
 
     # Calculate scores for each timestep
     for t in frames:
-        gt_ids_t = gt[gt.frame == t].track_id.to_numpy()
-        tr_ids_t = tr[tr.frame == t].track_id.to_numpy()
+        gt_ids_t = gt[gt.frame == t].particle.to_numpy()
+        tr_ids_t = tr[tr.frame == t].particle.to_numpy()
 
         if len(gt_ids_t) == 0:
             HOTA_FP += len(tr_ids_t)
