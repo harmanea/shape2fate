@@ -22,6 +22,9 @@ DATA_URL = "https://zenodo.org/api/records/17484958/files/CME%20tracking%20valid
 ZIP_PATH = os.path.join(DATA_DIR, "test_data.zip")
 
 MATCHING_THRESHOLD = 5
+PIXEL_SIZE_UM = 0.061 / 2
+MOTP_NORMALIZATION_UM = 0.1
+MOTP_NORMALIZATION_PX = MOTP_NORMALIZATION_UM / PIXEL_SIZE_UM
 
 if __name__ == "__main__":
     print("\nRunning shape2fate tracking example script ...\n")
@@ -58,7 +61,7 @@ if __name__ == "__main__":
     print("DONE")
 
     print("Running CCP detection on test data ... ", end="", flush=True)
-    detections = s2f.detection.generate_ccp_detections(model, device, images)
+    detections = s2f.detection.generate_ccp_detections(model=model, device=device, images=images)
     print("DONE")
 
     detections_path = os.path.join(DATA_DIR, "detections.csv")
@@ -151,7 +154,12 @@ if __name__ == "__main__":
     print("Computing MOTA and MOTP ... ", end="", flush=True)
     motas, motps = [], []
     for gt in gts:
-        results = s2f.metrics.mot_metrics(gt, eval_trajectories, MATCHING_THRESHOLD)
+        results = s2f.metrics.mot_metrics(
+            gt,
+            eval_trajectories,
+            MATCHING_THRESHOLD,
+            normalization=MOTP_NORMALIZATION_PX,
+        )
         motas.append(results["MOTA"])
         motps.append(1 - results["MOTP"])
     print("DONE")

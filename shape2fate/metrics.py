@@ -79,17 +79,22 @@ tiou = temporal_intersection_over_union
 mtiou = mean_temporal_intersection_over_union
 
 
-def mot_metrics(a: pd.DataFrame, b: pd.DataFrame, threshold: float) -> dict[str, float]:
+def mot_metrics(a: pd.DataFrame, b: pd.DataFrame, threshold: float, normalization: float = 1.0) -> dict[str, float]:
     """Compute CLEAR MOT tracking metrics.
 
     Args:
         a: Ground-truth detections with ``x``, ``y``, ``frame``, and ``particle`` columns.
         b: Tracker detections with ``x``, ``y``, ``frame``, and ``particle`` columns.
         threshold: Maximum distance for matching detections.
+        normalization: Distance used to normalize MOTP, in the same units as the coordinates. A value of ``1``
+            returns the mean matched distance without rescaling. Must be positive.
 
     Returns:
         Dictionary containing MOTA, MOTP, true positives, false negatives, false positives, and identity switches.
     """
+    if normalization <= 0:
+        raise ValueError("normalization must be positive")
+
     TP, FP, FN, IDS = 0, 0, 0, 0
     GT = len(a)
     d, c = 0, 0
@@ -111,7 +116,7 @@ def mot_metrics(a: pd.DataFrame, b: pd.DataFrame, threshold: float) -> dict[str,
         FN += np.sum((b_ind >= len(b_at_f)) & (a_ind < len(a_at_f)))
 
         d += np.sum(distances[a_ind[mask], b_ind[mask]])
-        c += len(mask)
+        c += np.count_nonzero(mask)
 
         current_matched = {}
         for ai, bi in zip(a_ind[mask], b_ind[mask]):
@@ -129,7 +134,7 @@ def mot_metrics(a: pd.DataFrame, b: pd.DataFrame, threshold: float) -> dict[str,
         last_matched = current_matched
 
     MOTA = 1 - (FN + FP + IDS) / GT
-    MOTP = d / c
+    MOTP = d / (c * normalization) if c > 0 else 0.0
 
     return {'MOTA': MOTA, 'MOTP': MOTP, 'TP': TP, 'FN': FN, 'FP': FP, 'IDS': IDS}
 
